@@ -9,6 +9,7 @@ class UserParser(YelpParser):
         self.in_path += "yelp_user.JSON"
         self.out_path += "user.txt"
         self.outfile = open(self.out_path, 'w')
+        self.entity_name = "User"
 
     def get_dict(self) -> dict:
         return {
@@ -19,7 +20,7 @@ class UserParser(YelpParser):
             # string, when the user joined Yelp, formatted like YYYY-MM-DD HH:mm:SS
             'yelping_since': str,
             # array of strings, an array of the user's friend as user_ids
-            'friends': str,
+            'friends': self.get_friends,
             # integer, number of useful votes sent by the user
             'useful': str,
             # integer, number of funny votes sent by the user
@@ -33,6 +34,10 @@ class UserParser(YelpParser):
             # integer, number of tips the user has posted
             'tipcount': str
             }
+
+    def get_friends(self, friends) -> str:
+        friends_str = "\n\tfriends: %s" % str(friends)
+        return friends_str
 
 
 """

@@ -8,7 +8,8 @@ def main():
     parsers = {"UserParser": UserParser(),
                "TipParser": TipParser(),
                "CheckinParser": CheckinParser(),
-               "BusinessParser": BusinessParser()}
+               "BusinessParser": BusinessParser()
+               }
     for name, parser in parsers.items():
         print(name, "Started")
         parser.parse_file()
