@@ -9,6 +9,7 @@ class BusinessParser(YelpParser):
         self.in_path += "yelp_business.JSON"
         self.out_path += "business.txt"
         self.outfile = open(self.out_path, 'w')
+        self.entity_name = "Business"
 
     def get_dict(self) -> dict:
         return {
@@ -35,12 +36,32 @@ class BusinessParser(YelpParser):
             # integer, 0 or 1 for closed or open, respectively
             'is_open': str,
             # an array of strings of business categories
-            'categories': self.splitStr,
+            'categories': self.get_categories,
             # object, business attributes to values. note: some attribute values might be objects
-            'attributes': str,
+            'attributes': self.get_attributes,
             # an object of key day to value hours, hours are using a 24hr clock
-            'hours': str
+            'hours': self.get_hours
         }
+
+    def get_categories(self, categories) -> str:
+        category_array = self.string_to_array(categories, split_on=',')
+        category_str = "\n\tcategories: %s" % str(category_array)
+        return category_str
+
+    def get_attributes(self, attributes_dict) -> str:
+        attributes_str = "\n\tattributes: {%s}" % (self.dict_to_str(attributes_dict, form='(%s, %s),'))
+        return attributes_str
+
+    def get_hours(self, hours_dict) -> str:
+        hours = []
+        for day, time in hours_dict.items():
+            time_array = self.string_to_array(time, split_on='-')
+            for t in time_array:
+                self.cleanStr4SQL(t)
+            day_time = (day, time_array)
+            hours.append(day_time)
+        hours_str = "\n\thours: %s" % str(hours)
+        return hours_str
 
 
 """

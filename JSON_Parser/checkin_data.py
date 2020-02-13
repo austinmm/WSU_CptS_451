@@ -9,14 +9,30 @@ class CheckinParser(YelpParser):
         self.in_path += "yelp_checkin.JSON"
         self.out_path += "checkin.txt"
         self.outfile = open(self.out_path, 'w')
+        self.entity_name = "Checkin"
 
     def get_dict(self) -> dict:
         return {
             # string, 22 character business id, maps to business in business.json
             'business_id': self.cleanStr4SQL,
             # string which is a comma-separated list of timestamps for each checkin, each with format YYYY-MM-DD HH:MM:SS
-            'date': str
+            'date': self.get_date_info
         }
+
+    def get_date_info(self, date_info) -> str:
+        all_date_info = self.string_to_array(date_info, split_on=',')
+        string = ""
+        for date_time in all_date_info:
+            date_time_array = self.string_to_array(date_time, split_on=' ')
+            date_info = date_time_array[0]
+            date_info = self.string_to_array(date_info, split_on='-')
+            date_str = ""
+            for di in date_info:
+                date_str += "'%s'," % di
+            time_info = date_time_array[1]
+            string += '(%s%s)' %(date_str, self.cleanStr4SQL(time_info))
+        return string
+
 
 """
 {

@@ -9,6 +9,7 @@ class TipParser(YelpParser):
         self.in_path += "yelp_tip.JSON"
         self.out_path += "tip.txt"
         self.outfile = open(self.out_path, 'w')
+        self.entity_name = "Tip"
 
     def get_dict(self) -> dict:
         return {
