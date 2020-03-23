@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8" />
+		<title>Yelp App</title>
+		<!-- https://electronjs.org/docs/tutorial/security#csp-meta-tag -->
+		<meta
+			http-equiv="Content-Security-Policy"
+			content="script-src 'self' 'unsafe-inline';"
+		/>
+		<link rel="stylesheet" href="index.css" />
+		<link
+			rel="stylesheet"
+			href="node_modules/bootstrap/dist/css/bootstrap.min.css"
+		/>
+		<!-- Insert this line above script imports  -->
+		<script>
+			if (typeof module === "object") {
+				window.module = module;
+				module = undefined;
+			}
+		</script>
+
+		<!-- normal script imports etc  -->
+		<script src="node_modules//jquery/dist/jquery.min.js"></script>
+		<script src="src/js/mainView.js"></script>
+		<script src="src/js/app.js"></script>
+
+		<!-- Insert this line after script imports -->
+		<script>
+			if (window.module) module = window.module;
+		</script>
+	</head>
+	<body>
+		<h1>CptS 451 Project</h1>
+	</body>
+
+	<div class="flex-container">
+		<div id="option-menu">
+			<div>
+				<h3>Select state:</h3>
+				<select id="states" class="selection-list">
+					<option disabled selected value> -- select an option -- </option>
+				</select>
+			</div>
+			<div>
+				<h3>Select cities:</h3>
+				<select id="cities" size="4" class="selection-list"> </select>
+			</div>
+			<div>
+				<h3>Select zipcode:</h3>
+				<select id="zipcodes" size="4" class="selection-list"> </select>
+			</div>
+		</div>
+		<div>
+			<h3>Select Business Catagories:</h3>
+			<p>Hold control/command for multiple selections</p>
+			<select id="catagories" size="4" multiple class="selection-list">
+			</select>
+		</div>
+		<div>
+			<table class="table" id="business-table">
+				<thead>
+					<tr>
+						<th scope="col">#</th>
+						<th scope="col">First</th>
+						<th scope="col">Last</th>
+						<th scope="col">Handle</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<th scope="row">1</th>
+						<td>Mark</td>
+						<td>Otto</td>
+						<td>@mdo</td>
+					</tr>
+					<tr>
+						<th scope="row">2</th>
+						<td>Jacob</td>
+						<td>Thornton</td>
+						<td>@fat</td>
+					</tr>
+					<tr>
+						<th scope="row">3</th>
+						<td>Larry</td>
+						<td>the Bird</td>
+						<td>@twitter</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+</html>
