@@ -1,3 +1,6 @@
+const url = require("url");
+const path = require("path");
+const { ipcRenderer } = require("electron");
 var mainView = (function() {
 	// placeholder for cached DOM elements
 	var DOM = {};
@@ -102,12 +105,30 @@ var mainView = (function() {
 	function renderDetails() {
 		const remote = require("electron").remote;
 		const BrowserWindow = remote.BrowserWindow;
-		const win = new BrowserWindow({
-			height: 600,
-			width: 800
+
+		// Synchronous message emmiter and handler
+		ipcRenderer.send("set-business-data", { selectedOptions });
+
+		// Async message handler
+		ipcRenderer.on("reply-business-data", (event, arg) => {
+			console.log(arg);
 		});
 
-		win.loadFile("details.html");
+		const win = new BrowserWindow({
+			height: 600,
+			width: 800,
+			webPreferences: {
+				nodeIntegration: true
+			}
+		});
+
+		win.loadURL(
+			url.format({
+				pathname: path.join(__dirname, "details.html"),
+				protocol: "file:",
+				slashes: true
+			})
+		);
 	}
 
 	/* =================== public methods ================== */
@@ -115,9 +136,7 @@ var mainView = (function() {
 	function init() {
 		console.log("mainView init...");
 		cacheDom();
-		console.log("DOM CACHED...");
 		bindEvents();
-		console.log("EVENTS Bounded...");
 		$(document).ready(function() {
 			// document is loaded and DOM is ready
 			renderStates();

@@ -1,6 +1,54 @@
 <!DOCTYPE html>
 <html>
-	<div>
-		Hello World
-	</div>
+	<head>
+		<meta charset="UTF-8" />
+		<title>Yelp App</title>
+		<!-- https://electronjs.org/docs/tutorial/security#csp-meta-tag -->
+		<meta
+			http-equiv="Content-Security-Policy"
+			content="script-src 'self' 'unsafe-inline';"
+		/>
+		<link rel="stylesheet" href="index.css" />
+		<link
+			rel="stylesheet"
+			href="node_modules/bootstrap/dist/css/bootstrap.min.css"
+		/>
+		<!-- Insert this line above script imports  -->
+		<script>
+			if (typeof module === "object") {
+				window.module = module;
+				module = undefined;
+			}
+		</script>
+
+		<!-- normal script imports etc  -->
+		<script src="node_modules//jquery/dist/jquery.min.js"></script>
+		<script src="src/js/detailsView.js"></script>
+		<script src="src/js/details.js"></script>
+
+		<!-- Insert this line after script imports -->
+		<script>
+			if (window.module) module = window.module;
+		</script>
+	</head>
+	<body>
+		<h1>CptS 451 Project</h1>
+		<h2>
+			TIPS for the business
+		</h2>
+		<div id="tip-list"></div>
+		<form class="new-tip-form">
+			<div class="form-group">
+				<label for="exampleFormControlTextarea1">Example textarea</label>
+				<textarea
+					class="form-control"
+					id="exampleFormControlTextarea1"
+					rows="3"
+				></textarea>
+				<button id="submit-tip" type="submit" class="btn btn-primary">
+					Submit
+				</button>
+			</div>
+		</form>
+	</body>
 </html>
