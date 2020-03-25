@@ -15,6 +15,8 @@ var mainView = (function() {
 	// cache DOM elements
 	function cacheDom() {
 		DOM.$businessTable = $("#business-table");
+		DOM.$businessTableColumns = $("#business-table-columns");
+		DOM.$businessTableEntries = $("#business-table-entries");
 		DOM.$states = $("#states");
 		DOM.$cities = $("#cities");
 		DOM.$zipcode = $("#zipcodes");
@@ -47,10 +49,11 @@ var mainView = (function() {
 	function handleCatagoriesSelection(e) {
 		selectedOptions.catagories = $(this).val();
 		console.log(selectedOptions);
+		renderBusinessTable();
 	}
 
 	function handleBusinessSelection(e) {
-		console.log($(this));
+		selectedOptions.business = $(this)[0].innerText.split("\t");
 		renderDetails();
 	}
 	// render DOM
@@ -99,6 +102,43 @@ var mainView = (function() {
 					value: catagories[catagoryIndex]
 				})
 			);
+		}
+	}
+
+	function renderBusinessTable() {
+		var mock_headers = ["#", "First", "Last", "Handle"];
+		var mock_entries = [
+			{ id: 1, firstName: "Mark", lastName: "Otto", handle: "@mdo" },
+			{ id: 1, firstName: "Mark", lastName: "Otto", handle: "@mdo" },
+			{ id: 1, firstName: "Mark", lastName: "Otto", handle: "@mdo" }
+		];
+		for (var headerIndex in mock_headers) {
+			console.log(mock_headers[headerIndex]);
+			DOM.$businessTableColumns.append(
+				$("<th/>", {
+					text: mock_headers[headerIndex],
+					value: mock_headers[headerIndex],
+					scope: "col"
+				})
+			);
+		}
+
+		var entry = DOM.$businessTableEntries;
+		for (var entryIndex in mock_entries) {
+			console.log(mock_headers[entryIndex]);
+			/*<tr>
+						<th scope="row">1</th>
+						<td>Mark</td>
+						<td>Otto</td>
+						<td>@mdo</td>
+					</tr>*/
+			var $row = $("<tr></tr>");
+			var $head = $("<td></td>").html(mock_entries[entryIndex].id);
+			var $fname = $("<td></td>").html(mock_entries[entryIndex].firstName);
+			var $lname = $("<td></td>").html(mock_entries[entryIndex].lastName);
+			var $handle = $("<td></td>").html(mock_entries[entryIndex].handle);
+			$row.append([$head, $fname, $lname, $handle]);
+			entry.append($row);
 		}
 	}
 
