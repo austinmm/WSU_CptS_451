@@ -7,9 +7,20 @@ class UserParser(YelpParser):
     def __init__(self):
         super().__init__()
         self.in_path += "yelp_user.JSON"
-        self.out_path += "user.txt"
-        self.outfile = open(self.out_path, 'w')
-        self.entity_name = "User"
+        self.table_name = "Yelper"
+        self.weak_entity_pfk: tuple = ("user_id", )
+        self.json_to_attr = {
+            'user_id': 'user_id',
+            'name': 'user_name',
+            'yelping_since': 'yelping_since',
+            'friends': 'Friendship',
+            'useful': 'useful',
+            'funny': 'funny',
+            'cool': 'cool',
+            'fans': 'fans',
+            'average_stars': 'average_stars',
+            'tipcount': 'tip_count'
+        }
 
     def get_dict(self) -> dict:
         return {
@@ -18,62 +29,27 @@ class UserParser(YelpParser):
             # string, the user's first name
             'name': self.cleanStr4SQL,
             # string, when the user joined Yelp, formatted like YYYY-MM-DD HH:mm:SS
-            'yelping_since': str,
+            'yelping_since': self.cleanStr4SQL,
             # array of strings, an array of the user's friend as user_ids
             'friends': self.get_friends,
             # integer, number of useful votes sent by the user
-            'useful': str,
+            'useful': self.cleanStr4SQL,
             # integer, number of funny votes sent by the user
-            'funny': str,
+            'funny': self.cleanStr4SQL,
             # integer, number of cool votes sent by the user
-            'cool': str,
+            'cool': self.cleanStr4SQL,
             # integer, number of fans the user has
-            'fans': str,
+            'fans': self.cleanStr4SQL,
             # float, average rating of all reviews
-            'average_stars': str,
+            'average_stars': self.cleanStr4SQL,
             # integer, number of tips the user has posted
-            'tipcount': str
+            'tipcount': self.cleanStr4SQL
             }
 
-    def get_friends(self, friends) -> str:
-        friends_str = "\n\tfriends: %s" % str(friends)
-        return friends_str
-
-
-"""
-{
-    // string, 22 character unique user id, maps to the user in user.json
-    "user_id": "Ha3iJu77CxlrFm-vQRs_8g",
-
-    // string, the user's first name
-    "name": "Sebastien",
-
-    // string, when the user joined Yelp, formatted like YYYY-MM-DD HH:mm:SS
-    "yelping_since": "2013-02-21 22:29:06",
-
-    // array of strings, an array of the user's friend as user_ids
-    "friends": [
-        "wqoXYLWmpkEH0YvTmHBsJQ",
-        "KUXLLiJGrjtSsapmxmpvTA",
-        "6e9rJKQC3n0RSKyHLViL-Q"
-    ],
-
-    // integer, number of useful votes sent by the user
-    "useful": 21,
-
-    // integer, number of funny votes sent by the user
-    "funny": 88,
-
-    // integer, number of cool votes sent by the user
-    "cool": 15,
-
-    // integer, number of fans the user has
-    "fans": 1032,
-
-    // float, average rating of all reviews
-    "average_stars": 4.31
-
-    // integer, number of tips the user has posted
-    "tipcount": 0
-}
-"""
+    def get_friends(self, friends) -> list:
+        yelper_friends = []
+        for friend in friends:
+            friend_id = self.cleanStr4SQL(friend)
+            friend_info = {'friend_id': friend_id}
+            yelper_friends.append(friend_info)
+        return yelper_friends

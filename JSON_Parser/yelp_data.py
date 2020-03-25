@@ -1,31 +1,44 @@
 import json
+import psycopg2
 
 
 class YelpParser:
-    def __init__(self, in_path="../Yelp_Data/JSON/", out_path="../Yelp_Data/TEXT/"):
-        self.delim = ' | '
-        self.entity_name = ""
+    def __init__(self, in_path="../Yelp_Data/JSON/", dbname="CptS451_TermProject",
+                 user='postgres', host='localhost', password='None'):
+        try:
+            connection_str = "dbname='{}' user='{}' host='{}' password='{}'".format(dbname, user, host, password)
+            self.db_connection = psycopg2.connect(connection_str)
+        except:
+            print('Unable to connect to the database!')
+        self.cursor = self.db_connection.cursor()
+        self.table_name = ""
         self.in_path = in_path
-        self.out_path = out_path
-        self.outfile = None
+        self.weak_entity_pfk = tuple()
+        self.json_to_attr = dict()
+        self.failed_sql: [()] = []
 
-    def cleanStr4SQL(self, string) -> str:
-        return "'%s'" % string.replace("'", "`").replace("\n", " ")
+    def close_db_connection(self):
+        self.cursor.close()
+        self.db_connection.close()
+
+    def cleanStr4SQL(self, value) -> str:
+        sql_str = str(value)
+        sql_str = sql_str.replace("'", "`").replace("\n", " ")
+        sql_str = "'{}'".format(sql_str)
+        return sql_str
 
     def string_to_array(self, string, split_on=', ') -> list:
         array = string.split(split_on)
         return array
 
-    def dict_to_str(self, dictionary, form) -> str:
-        string = ""
+    def unwrap_dict(self, dictionary) -> dict:
+        unwraped_dict: dict = {}
         for key, value in dictionary.items():
             if type(value) is dict:
-                string += self.dict_to_str(value, form)
+                unwraped_dict.update(self.unwrap_dict(value))
             else:
-                string += form % (key, value)
-        # removes last delimiter
-        string = string[:-1]
-        return string
+                unwraped_dict[key] = value
+        return unwraped_dict
 
     def array_to_str(self, array, form) -> str:
         string = ""
@@ -35,7 +48,6 @@ class YelpParser:
                 string += self.cleanStr4SQL(item)
             else:
                 string += form % self.cleanStr4SQL(item)
-        # removes last delimiter
         return string
 
     def parse_file(self):
@@ -43,26 +55,57 @@ class YelpParser:
         with open(self.in_path, 'r') as file:
             line = file.readline()
             count_line = 0
-            header = list(self.get_dict().keys())
-            self.outfile.write("HEADER: (%s)\n" % self.array_to_str(header, form="%s, "))
             # read each JSON abject and extract data
             while line:
-                self.parse_line(line, count_line)
+                self.parse_line(line)
                 line = file.readline()
                 count_line += 1
+        # sql that must be executed after dependent entries have been entered into database
+        self.dependent_sql()
+        self.close_db_connection()
         print(count_line)
-        self.outfile.close()
-        file.close()
 
     def get_dict(self) -> dict:
         print("This is supposed to be implemented by inheriting classes")
         return dict()
 
-    def parse_line(self, line, count):
+    def parse_line(self, line):
         data = json.loads(line)
-        self.outfile.write("%s %d: " % (self.entity_name, count+1))
+        sql_values: {str: {}} = {self.table_name: {}}
         for key, func in self.get_dict().items():
             val = func(data[key])
-            self.outfile.write(val + self.delim)
-        self.outfile.write('\n')
+            attr = self.json_to_attr[key]
+            if type(val) is list:
+                sql_values[attr] = val
+            else:
+                sql_values[self.table_name].update({attr: val})
+        self.sql_handler(sql_values=sql_values)
+
+    def sql_handler(self, sql_values: {str: {}}):
+        pfk_dict = {key: sql_values[self.table_name][key] for key in self.weak_entity_pfk}
+        for table, attributes in sql_values.items():
+            if table == self.table_name:
+                self.insert_into_table(table=table, attributes=attributes)
+            else:
+                for attr in attributes:
+                    attr.update(pfk_dict)
+                    self.insert_into_table(table=table, attributes=attr)
+
+    def insert_into_table(self, table: str, attributes: dict):
+        keys = ",".join(attributes.keys())
+        values = ",".join(attributes.values())
+        sql_str = 'INSERT INTO {}({}) VALUES ({});'.format(table, keys, values)
+        try:
+            self.cursor.execute(sql_str)
+        except psycopg2.DatabaseError as error:
+            # ForeignKeyViolation
+            if error.pgcode == '23503':
+                self.failed_sql.append((table, attributes))
+            else:
+                print("Failed to 'INSERT into '%s' table with...\n\t* %s" % (self.table_name, sql_str))
+        self.db_connection.commit()
+
+    def dependent_sql(self):
+        for table, attributes in self.failed_sql:
+            self.insert_into_table(table=table, attributes=attributes)
 
