@@ -3,6 +3,7 @@ from tip_data import TipParser
 from checkin_data import CheckinParser
 from business_data import BusinessParser
 import psycopg2
+import sys
 
 def drop_tables(cursor, db_connection):
     with open('../SQL/AbracaData_DROP.sql', 'r') as f:
@@ -16,10 +17,9 @@ def drop_tables(cursor, db_connection):
             db_connection.commit()
 
 def add_tables(cursor, db_connection):
-    with open('../SQL/AbracaData_RELATIONS_v2.sql.sql', 'r') as f:
+    with open('../SQL/AbracaData_RELATIONS_v2.sql', 'r') as f:
         lines = f.readlines()
         sql_str = "".join(lines)
-        #sql_str = sql_str.replace('\n', "")
         try:
             cursor.execute(sql_str)
         except:
@@ -31,9 +31,8 @@ def close_db_connection(cursor, db_connection):
     db_connection.close()
 
 if __name__ == "__main__":
-    password = str(input("Enter Postgres password, or 'None' if you don't have one: "))
     try:
-        connection_str = "dbname='CptS451_TermProject' user='postgres' host='localhost' password='{}'".format(password)
+        connection_str = "dbname='CptS451_TermProject' user='postgres' host='localhost' password='v4sNzfzyE2qLcb6mqo7v7BXT'"
         db_connection = psycopg2.connect(connection_str)
         cursor = db_connection.cursor()
         drop_tables(cursor=cursor, db_connection=db_connection)
@@ -41,10 +40,11 @@ if __name__ == "__main__":
         close_db_connection(cursor=cursor, db_connection=db_connection)
     except:
         print('Unable to connect to the database!')
-    parsers = {"UserParser": UserParser(password=password),
-               "BusinessParser": BusinessParser(password=password),
-               "TipParser": TipParser(password=password),
-               "CheckinParser": CheckinParser(password=password)
+        sys.exit()
+    parsers = {"UserParser": UserParser(),
+               "BusinessParser": BusinessParser(),
+               "TipParser": TipParser(),
+               "CheckinParser": CheckinParser()
                }
     for name, parser in parsers.items():
         print(name, "Started")

@@ -1,15 +1,16 @@
 import json
 import psycopg2
-
+import sys
 
 class YelpParser:
-    def __init__(self, in_path="../Yelp_Data/JSON/", dbname="CptS451_TermProject",
-                 user='postgres', host='localhost', password='None'):
+    def __init__(self, in_path="../yelp_CptS451_2020/", dbname="CptS451_TermProject",
+                 user='postgres', host='localhost', password='v4sNzfzyE2qLcb6mqo7v7BXT'):
         try:
             connection_str = "dbname='{}' user='{}' host='{}' password='{}'".format(dbname, user, host, password)
             self.db_connection = psycopg2.connect(connection_str)
         except:
             print('Unable to connect to the database!')
+            sys.exit()
         self.cursor = self.db_connection.cursor()
         self.table_name = ""
         self.in_path = in_path
