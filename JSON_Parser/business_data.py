@@ -1,4 +1,3 @@
-import time
 from yelp_data import YelpParser
 
 

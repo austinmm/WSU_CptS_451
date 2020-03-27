@@ -1,4 +1,3 @@
-import json
 from yelp_data import YelpParser
 
 

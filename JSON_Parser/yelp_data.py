@@ -23,8 +23,8 @@ class YelpParser:
         self.db_connection.close()
 
     def cleanStr4SQL(self, value) -> str:
-        sql_str = str(value)
-        sql_str = sql_str.replace("'", "`").replace("\n", " ")
+        sql_str = str(value).strip()
+        sql_str = sql_str.replace("'", "`")
         sql_str = "'{}'".format(sql_str)
         return sql_str
 
@@ -109,4 +109,3 @@ class YelpParser:
     def dependent_sql(self):
         for table, attributes in self.failed_sql:
             self.insert_into_table(table=table, attributes=attributes)
-
