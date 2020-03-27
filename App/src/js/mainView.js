@@ -6,11 +6,12 @@ var mainView = (function() {
 	var DOM = {};
 	var selectedOptions = {};
 
-	// Mock Data
-	var states = ["WA", "OR", "CA", "ID"];
-	var cities = ["Portland", "Salem", "Hillsboro", "Beaverton"];
+	// Data
+	var states = [];
+	var cities = [];
 	var zipcodes = ["98682", "99163", "83701", "98684"];
 	var catagories = ["Restaruant", "Cars", "Groceries", "Fast Food"];
+	var businesses = [];
 
 	// cache DOM elements
 	function cacheDom() {
@@ -33,22 +34,26 @@ var mainView = (function() {
 	// handle click events
 	function handleStateSelection(e) {
 		selectedOptions.state = $(this).val();
+		clearOptions(["cities", "zipcodes", "catagories", "businesses"]);
 		renderCities();
 	}
 
 	function handleCitySelection(e) {
 		selectedOptions.city = $(this).val();
+		clearOptions(["zipcodes", "catagories", "businesses"]);
 		renderZipCodes();
 	}
 
 	function handleZipCodeSelection(e) {
 		selectedOptions.zipcode = $(this).val();
+		clearOptions(["catagories", "businesses"]);
 		renderCatagories();
 	}
 
 	function handleCatagoriesSelection(e) {
 		selectedOptions.catagories = $(this).val();
 		console.log(selectedOptions);
+		clearOptions(["businesses"]);
 		renderBusinessTable();
 	}
 
@@ -58,59 +63,106 @@ var mainView = (function() {
 	}
 	// render DOM
 	function renderStates() {
-		for (var stateIndex in states) {
-			console.log(states[stateIndex]);
-			DOM.$states.append(
-				$("<option/>", {
-					text: states[stateIndex],
-					value: states[stateIndex]
-				})
-			);
-		}
+		$.ajax({
+			method: "GET",
+			url: "http://localhost:3000/getStates"
+		}).then(function(response) {
+			states = [];
+			for (var entry in response) {
+				states.push(response[entry].state);
+			}
+			for (var stateIndex in states) {
+				console.log(states[stateIndex]);
+				DOM.$states.append(
+					$("<option/>", {
+						text: states[stateIndex],
+						value: states[stateIndex]
+					})
+				);
+			}
+		});
+		selectedOptions = {};
 	}
 
 	function renderCities() {
-		for (var cityIndex in cities) {
-			console.log(cities[cityIndex]);
-			DOM.$cities.append(
-				$("<option/>", {
-					text: cities[cityIndex],
-					value: cities[cityIndex]
-				})
-			);
-		}
+		$.ajax({
+			method: "GET",
+			url: "http://localhost:3000/getCities",
+			data: { state: selectedOptions.state }
+		}).then(function(response) {
+			cities = [];
+			for (var entry in response) {
+				cities.push(response[entry].city);
+			}
+			for (var cityIndex in cities) {
+				console.log(cities[cityIndex]);
+				DOM.$cities.append(
+					$("<option/>", {
+						text: cities[cityIndex],
+						value: cities[cityIndex]
+					})
+				);
+			}
+		});
 	}
 
 	function renderZipCodes() {
-		for (var zipcodeIndex in zipcodes) {
-			console.log(zipcodes[zipcodeIndex]);
-			DOM.$zipcode.append(
-				$("<option/>", {
-					text: zipcodes[zipcodeIndex],
-					value: zipcodes[zipcodeIndex]
-				})
-			);
-		}
+		console.log("getting zips...");
+		$.ajax({
+			method: "GET",
+			url: "http://localhost:3000/getZipcodes",
+			data: { state: selectedOptions.state, city: selectedOptions.city }
+		}).then(function(response) {
+			zipcodes = [];
+			console.log(response);
+			for (var entry in response) {
+				zipcodes.push(response[entry].postal_code);
+			}
+			for (var zipcodeIndex in zipcodes) {
+				console.log(zipcodes[zipcodeIndex]);
+				DOM.$zipcode.append(
+					$("<option/>", {
+						text: zipcodes[zipcodeIndex],
+						value: zipcodes[zipcodeIndex]
+					})
+				);
+			}
+		});
 	}
 
 	function renderCatagories() {
-		for (var catagoryIndex in catagories) {
-			console.log(catagories[catagoryIndex]);
-			DOM.$catagories.append(
-				$("<option/>", {
-					text: catagories[catagoryIndex],
-					value: catagories[catagoryIndex]
-				})
-			);
-		}
+		$.ajax({
+			method: "GET",
+			url: "http://localhost:3000/getCategories",
+			data: {
+				state: selectedOptions.state,
+				city: selectedOptions.city,
+				postal_code: selectedOptions.zipcode
+			}
+		}).then(function(response) {
+			catagories = [];
+			for (var entry in response) {
+				catagories.push(response[entry].category);
+			}
+			for (var catagoryIndex in catagories) {
+				console.log(catagories[catagoryIndex]);
+				DOM.$catagories.append(
+					$("<option/>", {
+						text: catagories[catagoryIndex],
+						value: catagories[catagoryIndex]
+					})
+				);
+			}
+		});
 	}
 
-	function renderBusinessTable() {
-		var mock_headers = ["#", "First", "Last", "Handle"];
-		var mock_entries = [
-			{ id: 1, firstName: "Mark", lastName: "Otto", handle: "@mdo" },
-			{ id: 1, firstName: "Mark", lastName: "Otto", handle: "@mdo" },
-			{ id: 1, firstName: "Mark", lastName: "Otto", handle: "@mdo" }
+	function renderBusinessTableHeaders() {
+		var mock_headers = [
+			"#",
+			"business name",
+			"stars",
+			"num tips",
+			"num checkin"
 		];
 		for (var headerIndex in mock_headers) {
 			console.log(mock_headers[headerIndex]);
@@ -122,24 +174,45 @@ var mainView = (function() {
 				})
 			);
 		}
+	}
 
-		var entry = DOM.$businessTableEntries;
-		for (var entryIndex in mock_entries) {
-			console.log(mock_headers[entryIndex]);
-			/*<tr>
-						<th scope="row">1</th>
-						<td>Mark</td>
-						<td>Otto</td>
-						<td>@mdo</td>
-					</tr>*/
-			var $row = $("<tr></tr>");
-			var $head = $("<td></td>").html(mock_entries[entryIndex].id);
-			var $fname = $("<td></td>").html(mock_entries[entryIndex].firstName);
-			var $lname = $("<td></td>").html(mock_entries[entryIndex].lastName);
-			var $handle = $("<td></td>").html(mock_entries[entryIndex].handle);
-			$row.append([$head, $fname, $lname, $handle]);
-			entry.append($row);
-		}
+	function renderBusinessTable() {
+		$.ajax({
+			method: "GET",
+			url: "http://localhost:3000/getBusinesses",
+			data: {
+				state: selectedOptions.state,
+				city: selectedOptions.city,
+				postal_code: selectedOptions.zipcode,
+				catagories: selectedOptions.catagories
+			}
+		}).then(function(response) {
+			console.log(response);
+			businesses = [];
+			for (var entry in response) {
+				businesses.push(response[entry]);
+			}
+
+			DOM.$businessTableEntries.empty();
+			var entry = DOM.$businessTableEntries;
+			let i = 1;
+			for (var entryIndex in businesses) {
+				var $row = $("<tr></tr>");
+				var $head = $("<td></td>").html(i);
+				var $name = $("<td></td>").html(businesses[entryIndex].business_name);
+				var $stars = $("<td></td>").html(businesses[entryIndex].stars);
+				var $tips = $("<td></td>").html(businesses[entryIndex].num_tips);
+				var $id = $('<td hidden="true"></td>').html(
+					businesses[entryIndex].business_id
+				);
+				var $checkins = $("<td></td>").html(
+					businesses[entryIndex].num_checkins
+				);
+				$row.append([$head, $name, $stars, $tips, $checkins, $id]);
+				entry.append($row);
+				i += 1;
+			}
+		});
 	}
 
 	function renderDetails() {
@@ -171,6 +244,28 @@ var mainView = (function() {
 		);
 	}
 
+	// Clear results
+	function clearOptions(options) {
+		tableOptions = ["cities", "zipcodes", "catagories", "businesses"]; // states always exists so they are excluded
+		clearDOM = [
+			DOM.$cities,
+			DOM.$zipcode,
+			DOM.$catagories,
+			DOM.$businessTableEntries
+		];
+		for (entry1 in options) {
+			for (entry2 in tableOptions) {
+				console.log(`${options[entry1]}, ${tableOptions[entry2]}`);
+				if (options[entry1] == tableOptions[entry2]) {
+					console.log(options[entry1] == tableOptions[entry2]);
+					console.log(clearDOM[entry2]);
+					clearDOM[entry2].empty();
+					break;
+				}
+			}
+		}
+	}
+
 	/* =================== public methods ================== */
 	// main init method
 	function init() {
@@ -180,6 +275,7 @@ var mainView = (function() {
 		$(document).ready(function() {
 			// document is loaded and DOM is ready
 			renderStates();
+			renderBusinessTableHeaders();
 		});
 	}
 	/* =============== export public methods =============== */
