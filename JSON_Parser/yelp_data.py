@@ -1,15 +1,16 @@
 import json
 import psycopg2
-
+import sys
 
 class YelpParser:
-    def __init__(self, in_path="../yelp_CptS451_2020/", dbname="cpts451_termproject",
-                 user='noahtaylor', host='localhost', password='none'):
+    def __init__(self, in_path="../yelp_CptS451_2020/", dbname="CptS451_TermProject",
+                 user='postgres', host='localhost', password='v4sNzfzyE2qLcb6mqo7v7BXT'):
         try:
             connection_str = "dbname='{}' user='{}' host='{}' password='{}'".format(dbname, user, host, password)
             self.db_connection = psycopg2.connect(connection_str)
         except:
             print('Unable to connect to the database!')
+            sys.exit()
         self.cursor = self.db_connection.cursor()
         self.table_name = ""
         self.in_path = in_path
@@ -22,8 +23,8 @@ class YelpParser:
         self.db_connection.close()
 
     def cleanStr4SQL(self, value) -> str:
-        sql_str = str(value)
-        sql_str = sql_str.replace("'", "`").replace("\n", " ")
+        sql_str = str(value).strip()
+        sql_str = sql_str.replace("'", "`")
         sql_str = "'{}'".format(sql_str)
         return sql_str
 
@@ -108,4 +109,3 @@ class YelpParser:
     def dependent_sql(self):
         for table, attributes in self.failed_sql:
             self.insert_into_table(table=table, attributes=attributes)
-
