@@ -3,8 +3,8 @@ import psycopg2
 
 
 class YelpParser:
-    def __init__(self, in_path="../Yelp_Data/JSON/", dbname="CptS451_TermProject",
-                 user='postgres', host='localhost', password='None'):
+    def __init__(self, in_path="../yelp_CptS451_2020/", dbname="cpts451_termproject",
+                 user='noahtaylor', host='localhost', password='none'):
         try:
             connection_str = "dbname='{}' user='{}' host='{}' password='{}'".format(dbname, user, host, password)
             self.db_connection = psycopg2.connect(connection_str)

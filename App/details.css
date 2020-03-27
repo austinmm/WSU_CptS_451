@@ -1,0 +1,10 @@
+.new-tip-form {
+	justify-content: center;
+	width: 75%;
+}
+
+body > * {
+	justify-content: center;
+	width: 80%;
+	margin: 20px;
+}
