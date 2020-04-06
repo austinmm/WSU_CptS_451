@@ -32,33 +32,46 @@
 		</script>
 	</head>
 	<body>
-		<h1>CptS 451 Project</h1>
+		<!-- Image and text -->
+		<nav class="navbar navbar-expand-lg navbar-light bg-light">
+			<a class="navbar-brand" href="#">Cpts 451 Project</a>
+			
+						<a class="nav-link" href="index.html"
+							>Business <span class="sr-only">(current)</span></a
+						>
+						<a class="nav-link" href="user.html"
+							>User <span class="sr-only">(current)</span></a
+						>
+			</div>
+		</nav>
 	</body>
 
-	<div class="flex-container">
-		<div id="option-menu">
+	<div class="row">
+		<div id="selctionMenu" class="flex-container col-sm-6">
+			<div id="option-menu">
+				<div>
+					<h3>Select state:</h3>
+					<select id="states" class="selection-list">
+						<option disabled selected value> -- select an option -- </option>
+					</select>
+				</div>
+				<div>
+					<h3>Select cities:</h3>
+					<select id="cities" size="4" class="selection-list"> </select>
+				</div>
+				<div>
+					<h3>Select zipcode:</h3>
+					<select id="zipcodes" size="4" class="selection-list"> </select>
+				</div>
+			</div>
 			<div>
-				<h3>Select state:</h3>
-				<select id="states" class="selection-list">
-					<option disabled selected value> -- select an option -- </option>
+				<h3>Select Business Catagories:</h3>
+				<p>Hold control/command for multiple selections</p>
+				<select id="catagories" size="4" multiple class="selection-list">
 				</select>
 			</div>
-			<div>
-				<h3>Select cities:</h3>
-				<select id="cities" size="4" class="selection-list"> </select>
-			</div>
-			<div>
-				<h3>Select zipcode:</h3>
-				<select id="zipcodes" size="4" class="selection-list"> </select>
-			</div>
 		</div>
-		<div>
-			<h3>Select Business Catagories:</h3>
-			<p>Hold control/command for multiple selections</p>
-			<select id="catagories" size="4" multiple class="selection-list">
-			</select>
-		</div>
-		<div>
+		<div class="col-sm-6">
 			<table class="table" id="business-table">
 				<thead>
 					<tr id="business-table-columns">

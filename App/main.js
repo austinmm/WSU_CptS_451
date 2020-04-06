@@ -9,12 +9,12 @@ var businessData = {};
 function createWindow() {
 	// Create the browser window.
 	win = new BrowserWindow({
-		width: 800,
-		height: 600,
+		width: 1200,
+		height: 800,
 		webPreferences: {
-			nodeIntegration: true
+			nodeIntegration: true,
 		},
-		show: true
+		show: true,
 	});
 
 	// and load the index.html of the app.
@@ -22,7 +22,7 @@ function createWindow() {
 		url.format({
 			pathname: path.join(__dirname, "index.html"),
 			protocol: "file:",
-			slashes: true
+			slashes: true,
 		})
 	);
 
