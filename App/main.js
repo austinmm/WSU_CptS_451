@@ -20,7 +20,7 @@ function createWindow() {
 	// and load the index.html of the app.
 	win.loadURL(
 		url.format({
-			pathname: path.join(__dirname, "businessView.html"),
+			pathname: path.join(__dirname, "userView.html"),
 			protocol: "file:",
 			slashes: true
 		})
@@ -38,7 +38,6 @@ function createWindow() {
 app.whenReady().then(createWindow);
 
 // IPC messages
-
 // Event handler for asynchronous incoming messages
 ipcMain.on("set-business-data", (event, arg) => {
 	console.log(arg);

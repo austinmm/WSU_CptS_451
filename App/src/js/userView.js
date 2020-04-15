@@ -1,6 +1,9 @@
 const url = require("url");
 const path = require("path");
 const { ipcRenderer } = require("electron");
+const { BrowserWindow } = require("electron").remote;
+
+
 var userView = (function() {
 	// placeholder for cached DOM elements
 	var DOM = {};
@@ -8,58 +11,59 @@ var userView = (function() {
 
 	// cache DOM elements
 	function cacheDom() {
+		DOM.$businessViewLink = $("#businessView_link");
+		DOM.$searchUsers = $("#search_users");
+		DOM.$selectUser = $("#search_users_results");
+		DOM.$friendsTable = $("#friends_table");
+		DOM.$friendsTipTable = $("#friends_tip_table");
 
+		DOM.$yelper_user_name= $("#user_name");
+		DOM.$yelper_average_stars = $("#average_stars");
+		DOM.$yelper_yelping_since = $("#yelping_since");
+		DOM.$yelper_fans = $("#fans");
+		DOM.$yelper_cool = $("#cool");
+		DOM.$yelper_useful = $("#useful");
+		DOM.$yelper_funny = $("#funny");
+		DOM.$yelper_longitude = $("#longitude");
+		DOM.$yelper_latitude = $("#latitude");
+		DOM.$yelper_total_likes= $("#total_likes");
+		DOM.$yelper_tip_count= $("#tip_count");
 	}
 	// bind events
 	function bindEvents() {
-		
+		DOM.$searchUsers.change(handleUserSearch);
+		DOM.$selectUser.change(handleUserSelection);
+		DOM.$businessViewLink.click(renderBusinessView);
 	}
-	// handle click events
-	function handleStateSelection(e) {
-		selectedOptions.state = $(this).val();
-		clearOptions(["cities", "zipcodes", "catagories", "businesses"]);
-		renderCities();
+	
+
+	function handleUserSearch(e) {
+		selectedOptions.user_name = $(this).val();
+		renderUserIDs();
 	}
 
-	function handleCitySelection(e) {
-		selectedOptions.city = $(this).val();
-		clearOptions(["zipcodes", "catagories", "businesses"]);
-		renderZipCodes();
+	function handleUserSelection(e) {
+		selectedOptions.user_id = $(this).val();
+		renderUserInformation();
+		//renderFriends();
+		//renderFriendsTips();
 	}
-
-	function handleZipCodeSelection(e) {
-		selectedOptions.zipcode = $(this).val();
-		clearOptions(["catagories", "businesses"]);
-		renderCatagories();
-	}
-
-	function handleCatagoriesSelection(e) {
-		selectedOptions.catagories = $(this).val();
-		console.log(selectedOptions);
-		clearOptions(["businesses"]);
-		renderBusinessTable();
-	}
-
-	function handleBusinessSelection(e) {
-		selectedOptions.business = $(this)[0].innerText.split("\t");
-		renderDetails();
-	}
+	
 	// render DOM
-	function renderStates() {
+	function renderUserIDs() {
 		$.ajax({
 			method: "GET",
-			url: "http://localhost:3000/getStates"
-		}).then(function(response) {
-			states = [];
-			for (var entry in response) {
-				states.push(response[entry].state);
+			url: "http://localhost:3000/getUserIDs",
+			data: {
+				user_name: selectedOptions.user_name
 			}
-			for (var stateIndex in states) {
-				console.log(states[stateIndex]);
-				DOM.$states.append(
+		}).then(function(response) {
+			for (var entry in response) {
+				user_id = response[entry].user_id;
+				DOM.$selectUser.append(
 					$("<option/>", {
-						text: states[stateIndex],
-						value: states[stateIndex]
+						text: user_id,
+						value: user_id
 					})
 				);
 			}
@@ -67,102 +71,34 @@ var userView = (function() {
 		selectedOptions = {};
 	}
 
-	function renderCities() {
+	function renderUserInformation() {
 		$.ajax({
 			method: "GET",
-			url: "http://localhost:3000/getCities",
-			data: { state: selectedOptions.state }
-		}).then(function(response) {
-			cities = [];
-			for (var entry in response) {
-				cities.push(response[entry].city);
-			}
-			for (var cityIndex in cities) {
-				console.log(cities[cityIndex]);
-				DOM.$cities.append(
-					$("<option/>", {
-						text: cities[cityIndex],
-						value: cities[cityIndex]
-					})
-				);
-			}
-		});
-	}
-
-	function renderZipCodes() {
-		console.log("getting zips...");
-		$.ajax({
-			method: "GET",
-			url: "http://localhost:3000/getZipcodes",
-			data: { state: selectedOptions.state, city: selectedOptions.city }
-		}).then(function(response) {
-			zipcodes = [];
-			console.log(response);
-			for (var entry in response) {
-				zipcodes.push(response[entry].postal_code);
-			}
-			for (var zipcodeIndex in zipcodes) {
-				console.log(zipcodes[zipcodeIndex]);
-				DOM.$zipcode.append(
-					$("<option/>", {
-						text: zipcodes[zipcodeIndex],
-						value: zipcodes[zipcodeIndex]
-					})
-				);
-			}
-		});
-	}
-
-	function renderCatagories() {
-		$.ajax({
-			method: "GET",
-			url: "http://localhost:3000/getCategories",
+			url: "http://localhost:3000/getUser",
 			data: {
-				state: selectedOptions.state,
-				city: selectedOptions.city,
-				postal_code: selectedOptions.zipcode
+				user_id: selectedOptions.user_id
 			}
 		}).then(function(response) {
-			catagories = [];
-			for (var entry in response) {
-				catagories.push(response[entry].category);
-			}
-			for (var catagoryIndex in catagories) {
-				console.log(catagories[catagoryIndex]);
-				DOM.$catagories.append(
-					$("<option/>", {
-						text: catagories[catagoryIndex],
-						value: catagories[catagoryIndex]
-					})
-				);
-			}
+			user_info = response[0];
+			DOM.$yelper_user_name.val(user_info.user_name);
+			DOM.$yelper_average_stars.val(user_info.average_stars);
+			DOM.$yelper_yelping_since.val(user_info.yelping_since);
+			DOM.$yelper_fans.val(user_info.fans);
+			DOM.$yelper_cool.val(user_info.cool);
+			DOM.$yelper_useful.val(user_info.useful);
+			DOM.$yelper_funny.val(user_info.funny);
+			DOM.$yelper_longitude.val(user_info.longitude);
+			DOM.$yelper_latitude.val(user_info.latitude);
+			DOM.$yelper_total_likes.val(user_info.total_likes);
+			DOM.$yelper_tip_count.val(user_info.tip_count);
 		});
+		selectedOptions = {};
 	}
 
-	function renderBusinessTableHeaders() {
-		var mock_headers = [
-			"#",
-			"business name",
-			"stars",
-			"num tips",
-			"num checkin"
-		];
-		for (var headerIndex in mock_headers) {
-			console.log(mock_headers[headerIndex]);
-			DOM.$businessTableColumns.append(
-				$("<th/>", {
-					text: mock_headers[headerIndex],
-					value: mock_headers[headerIndex],
-					scope: "col"
-				})
-			);
-		}
-	}
-
-	function renderBusinessTable() {
+	function renderFriends() {
 		$.ajax({
 			method: "GET",
-			url: "http://localhost:3000/getBusinesses",
+			url: "http://localhost:3000/getFriends",
 			data: {
 				state: selectedOptions.state,
 				city: selectedOptions.city,
@@ -198,6 +134,56 @@ var userView = (function() {
 		});
 	}
 
+	function renderFriendsTips() {
+		$.ajax({
+			method: "GET",
+			url: "http://localhost:3000/getFriendsTips",
+			data: {
+				state: selectedOptions.state,
+				city: selectedOptions.city,
+				postal_code: selectedOptions.zipcode,
+				catagories: selectedOptions.catagories
+			}
+		}).then(function(response) {
+			console.log(response);
+			businesses = [];
+			for (var entry in response) {
+				businesses.push(response[entry]);
+			}
+
+			DOM.$businessTableEntries.empty();
+			var entry = DOM.$businessTableEntries;
+			let i = 1;
+			for (var entryIndex in businesses) {
+				var $row = $("<tr></tr>");
+				var $head = $("<td></td>").html(i);
+				var $name = $("<td></td>").html(businesses[entryIndex].business_name);
+				var $stars = $("<td></td>").html(businesses[entryIndex].stars);
+				var $tips = $("<td></td>").html(businesses[entryIndex].num_tips);
+				var $id = $('<td hidden="true"></td>').html(
+					businesses[entryIndex].business_id
+				);
+				var $checkins = $("<td></td>").html(
+					businesses[entryIndex].num_checkins
+				);
+				$row.append([$head, $name, $stars, $tips, $checkins, $id]);
+				entry.append($row);
+				i += 1;
+			}
+		});
+	}
+
+	function renderBusinessView(e) {
+		let win = BrowserWindow.getFocusedWindow();
+		win.loadURL(
+			url.format({
+				pathname: path.join(__dirname, "userView.html"),
+				protocol: "file:",
+				slashes: true
+			})
+		);
+	}
+
 	/* =================== public methods ================== */
 	// main init method
 	function init() {
@@ -206,8 +192,7 @@ var userView = (function() {
 		bindEvents();
 		$(document).ready(function() {
 			// document is loaded and DOM is ready
-			renderStates();
-			renderBusinessTableHeaders();
+
 		});
 	}
 	/* =============== export public methods =============== */

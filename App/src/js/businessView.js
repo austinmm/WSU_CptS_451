@@ -1,6 +1,9 @@
 const url = require("url");
 const path = require("path");
 const { ipcRenderer } = require("electron");
+const { BrowserWindow } = require("electron").remote;
+
+
 var businessView = (function() {
 	// placeholder for cached DOM elements
 	var DOM = {};
@@ -15,6 +18,7 @@ var businessView = (function() {
 
 	// cache DOM elements
 	function cacheDom() {
+		DOM.$userViewLink = $("#userView_link");
 		DOM.$businessTable = $("#business-table");
 		DOM.$businessTableColumns = $("#business-table-columns");
 		DOM.$businessTableEntries = $("#business-table-entries");
@@ -30,6 +34,7 @@ var businessView = (function() {
 		DOM.$zipcode.change(handleZipCodeSelection);
 		DOM.$catagories.change(handleCatagoriesSelection);
 		DOM.$businessTable.on("click", "tr", handleBusinessSelection);
+		DOM.$userViewLink.click(renderUserView);
 	}
 	// handle click events
 	function handleStateSelection(e) {
@@ -216,8 +221,6 @@ var businessView = (function() {
 	}
 
 	function renderDetails() {
-		const remote = require("electron").remote;
-		const BrowserWindow = remote.BrowserWindow;
 
 		// Synchronous message emmiter and handler
 		ipcRenderer.send("set-business-data", { selectedOptions });
@@ -243,6 +246,18 @@ var businessView = (function() {
 			})
 		);
 	}
+
+	function renderUserView(e) {
+		let win = BrowserWindow.getFocusedWindow();
+		win.loadURL(
+			url.format({
+				pathname: path.join(__dirname, "userView.html"),
+				protocol: "file:",
+				slashes: true
+			})
+		);
+	}
+	
 
 	// Clear results
 	function clearOptions(options) {
