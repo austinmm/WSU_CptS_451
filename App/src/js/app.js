@@ -1,3 +1,3 @@
 $(document).ready(function() {
-	mainView.init();
+	businessView.init();
 });

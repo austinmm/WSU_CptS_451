@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8" />
+		<title>Yelp App</title>
+		<!-- https://electronjs.org/docs/tutorial/security#csp-meta-tag -->
+		<meta
+			http-equiv="Content-Security-Policy"
+			content="script-src 'self' 'unsafe-inline';"
+		/>
+		<link rel="stylesheet" href="userView.css" />
+		<link
+			rel="stylesheet"
+			href="node_modules/bootstrap/dist/css/bootstrap.min.css"
+		/>
+		<!-- Insert this line above script imports  -->
+		<script>
+			if (typeof module === "object") {
+				window.module = module;
+				module = undefined;
+			}
+		</script>
+
+		<!-- normal script imports etc  -->
+		<script src="node_modules//jquery/dist/jquery.min.js"></script>
+		<script src="src/js/userView.js"></script>
+		<script src="src/js/app.js"></script>
+
+		<!-- Insert this line after script imports -->
+		<script>
+			if (window.module) module = window.module;
+		</script>
+    </head>
+    <header>
+        <div class="navbar">
+			<ul>
+				<li><a style="color: lightgrey !important; font-weight: bold;">CptS 451 Project</a></li>
+				<li><a class="active" href="./userView.html">User Information</a></li>
+				<li><a href="./businessView.html">Business Information</a></li>
+			</ul>
+		</div>
+    </header>
+	<body>
+        <div class="flex-container">
+            <div id="user_container" class="inline_container">
+                <div id="set_user_container">
+                    <h3>Set Current User</h3>
+                    <hr/>
+                    <form>
+                        <label for="name">Search Users:</label>
+                        <input type="text" id="search_users" name="search_users">
+                    </form>
+                    <select id="search_users_results" size="10" class="selection-list" style="width: 100%;"></select>
+                </div>
+                <div id="user_info_container">
+                    <h3>User Information</h3>
+                    <hr/>
+                    <form>
+                        <label for="name">Name:</label>
+                        <input type="text" disabled="true" id="name" name="name"><br>
+                        <div class="inline_container">
+                            <div style="margin: 20px;">
+                                <label for="stars">Stars:</label>
+                                <input type="text" disabled="true" id="stars" name="stars" style="width: 100px;">
+                            </div>
+                            <div style="margin: 20px;">
+                                <label for="fans">Fans:</label>
+                                <input type="text" disabled="true" id="fans" name="fans" style="width: 100px;">
+                            </div>
+                        </div>
+                        <label for="yelping_since">Yelping Since:</label>
+                        <input type="text" disabled="true" id="yelping_since" name="yelping_since"><br><br>
+                        <label for="tip_count">Tip Count:</label>
+                        <input type="text" disabled="true" id="tip_count" name="tip_count"><br><br>
+                        <label for="tip_likes">Total Tip Likes:</label>
+                        <input type="text" disabled="true" id="tip_likes" name="tip_likes"><br><br>
+                        <h4 style="text-align: center;">Votes</h4>
+                        <div id="votes" class="inline_container">
+                            <div>
+                                <label for="funny">Funny</label><br/>
+                                <input type="text" disabled="true" id="funny" name="funny" style="width: 100px;">
+                            </div>
+                            <div>
+                                <label for="cool">Cool</label><br/>
+                                <input type="text" disabled="true" id="cool" name="cool" style="width: 100px;">
+                            </div>
+                            <div>
+                                <label for="useful">Useful</label><br/>
+                                <input type="text" disabled="true" id="useful" name="useful" style="width: 100px;">
+                            </div>
+                        </div>
+                        <h4 style="text-align: center;">Location</h4>
+                        <div id="location" class="inline_container">
+                            <div>
+                                <label for="latitude">Latitude</label><br>
+                                <input type="text" disabled="true" id="latitude" name="latitude"><br><br>
+                                <input type="button" value="Edit" style="width: 100px;"/>
+                            </div>
+                            <div>
+                                <label for="longitude">Longitude</label><br>
+                                <input type="text" disabled="true" id="longitude" name="longitude"><br><br>
+                                <input type="button" value="Update" style="width: 100px;"/>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div>
+                <table class="table" id="friends_table">
+                    <thead>
+                        <tr id="friends_table_columns">
+                            <th scope="col">Name</th>
+                            <th scope="col">Total Likes</th>
+                            <th scope="col">Avg Stars</th>
+                            <th scope="col">Yelping Since</th>
+                        </tr>
+                    </thead>
+                    <tbody id="friends_table_entries">
+                    </tbody>
+                </table>
+            </div>
+            <div>
+                <table class="table" id="friends_tip_table">
+                    <thead>
+                        <tr id="friends_tip_table_columns">
+                            <th scope="col">Name</th>
+                            <th scope="col">Business</th>
+                            <th scope="col">City</th>
+                            <th scope="col">Text</th>
+                            <th scope="col">Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="friends_tip_table_entries">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </body>
+    <footer>
+        Created By: Noah Taylor & Austin Marino
+    </footer>
+</html>

@@ -1,7 +1,7 @@
 const url = require("url");
 const path = require("path");
 const { ipcRenderer } = require("electron");
-var mainView = (function() {
+var businessView = (function() {
 	// placeholder for cached DOM elements
 	var DOM = {};
 	var selectedOptions = {};
@@ -269,7 +269,7 @@ var mainView = (function() {
 	/* =================== public methods ================== */
 	// main init method
 	function init() {
-		console.log("mainView init...");
+		console.log("businessView init...");
 		cacheDom();
 		bindEvents();
 		$(document).ready(function() {
