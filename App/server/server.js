@@ -17,6 +17,7 @@ server.get("/getBusinessID", db.getBusinessID);
 // User Data
 server.get("/getUserIDs", userViewDB.getUserIDs);
 server.get("/getUser", userViewDB.getUser);
+server.get("/updateUserLocation", userViewDB.updateUserLocation);
 server.get("/getFriends", userViewDB.getFriends);
 server.get("/getFriendsTips", userViewDB.getFriendsTips);
 // Business/User Data

@@ -50,12 +50,12 @@
                         <label for="search_users">Search Users:</label>
                         <input type="search" id="search_users" name="search_users">
                     </div>
-                    <select id="search_users_results" size="10" class="selection-list" style="width: 100%;"></select>
+                    <select id="search_users_results" size="20" class="selection-list" style="width: 100%;"></select>
                 </div>
                 <div id="user_info_container">
                     <h3>User Information</h3>
                     <hr/>
-                    <form>
+                    <div>
                         <label for="user_name">Name:</label>
                         <input type="text" disabled="true" id="user_name" name="user_name"><br>
                         <div class="inline_container">
@@ -94,19 +94,19 @@
                             <div>
                                 <label for="latitude">Latitude</label><br>
                                 <input type="text" disabled="true" id="latitude" name="latitude"><br><br>
-                                <input type="button" value="Edit" style="width: 100px;"/>
+                                <input id="edit_location" type="button" value="Edit" style="width: 100px;"/>
                             </div>
                             <div>
                                 <label for="longitude">Longitude</label><br>
                                 <input type="text" disabled="true" id="longitude" name="longitude"><br><br>
-                                <input type="button" value="Update" style="width: 100px;"/>
+                                <input id="update_location" type="button" value="Update" style="width: 100px;"/>
                             </div>
                         </div>
-                    </form>
+                    </div>
                 </div>
             </div>
-            <div>
-                <table class="table" id="friends_table">
+            <div class="inline_container">
+                <table class="table" id="friends_table" style="border: 5px solid black; margin-right: 5px;">
                     <thead>
                         <tr id="friends_table_columns">
                             <th scope="col">Name</th>
@@ -118,9 +118,7 @@
                     <tbody id="friends_table_entries">
                     </tbody>
                 </table>
-            </div>
-            <div>
-                <table class="table" id="friends_tip_table">
+                <table class="table" id="friends_tip_table" style="border: 5px solid black; margin-left: 5px;">
                     <thead>
                         <tr id="friends_tip_table_columns">
                             <th scope="col">Name</th>

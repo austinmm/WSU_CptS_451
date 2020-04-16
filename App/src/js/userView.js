@@ -7,15 +7,16 @@ const { BrowserWindow } = require("electron").remote;
 var userView = (function() {
 	// placeholder for cached DOM elements
 	var DOM = {};
-	var selectedOptions = {};
 
 	// cache DOM elements
 	function cacheDom() {
 		DOM.$businessViewLink = $("#businessView_link");
 		DOM.$searchUsers = $("#search_users");
 		DOM.$selectUser = $("#search_users_results");
-		DOM.$friendsTable = $("#friends_table");
-		DOM.$friendsTipTable = $("#friends_tip_table");
+		DOM.$editUserLocation = $("#edit_location");
+		DOM.$updateUserLocation = $("#update_location");
+		DOM.$friendsTable = $("#friends_table_entries");
+		DOM.$friendsTipTable = $("#friends_tip_table_entries");
 
 		DOM.$yelper_user_name= $("#user_name");
 		DOM.$yelper_average_stars = $("#average_stars");
@@ -33,31 +34,48 @@ var userView = (function() {
 	function bindEvents() {
 		DOM.$searchUsers.change(handleUserSearch);
 		DOM.$selectUser.change(handleUserSelection);
+		DOM.$editUserLocation.click(handleUserLocationEdit);
+		DOM.$updateUserLocation.click(handleUserLocationUpdate);
 		DOM.$businessViewLink.click(renderBusinessView);
 	}
 	
 
 	function handleUserSearch(e) {
-		selectedOptions.user_name = $(this).val();
-		renderUserIDs();
+		const user_name = $(this).val();
+		renderUserIDs(user_name);
 	}
 
 	function handleUserSelection(e) {
-		selectedOptions.user_id = $(this).val();
-		renderUserInformation();
-		//renderFriends();
-		//renderFriendsTips();
+		 const user_id = $(this).val();
+		renderUserInformation(user_id);
+		renderFriends(user_id);
+		renderFriendsTips(user_id);
+	}
+
+	function handleUserLocationEdit(e) {
+		$("#longitude").prop("disabled", false);
+		$("#latitude").prop("disabled", false);
+	}
+
+	function handleUserLocationUpdate(e) {
+		const user_id = DOM.$selectUser.val();
+		const long = $("#longitude").val();
+		const lat = $("#latitude").val();
+		$("#longitude").prop("disabled", true);
+		$("#latitude").prop("disabled", true);
+		updateUserLocation(user_id, long, lat);
 	}
 	
 	// render DOM
-	function renderUserIDs() {
+	function renderUserIDs(user_name) {
 		$.ajax({
 			method: "GET",
 			url: "http://localhost:3000/getUserIDs",
 			data: {
-				user_name: selectedOptions.user_name
+				user_name: user_name
 			}
 		}).then(function(response) {
+			DOM.$selectUser.html("");
 			for (var entry in response) {
 				user_id = response[entry].user_id;
 				DOM.$selectUser.append(
@@ -68,15 +86,14 @@ var userView = (function() {
 				);
 			}
 		});
-		selectedOptions = {};
 	}
 
-	function renderUserInformation() {
+	function renderUserInformation(user_id) {
 		$.ajax({
 			method: "GET",
 			url: "http://localhost:3000/getUser",
 			data: {
-				user_id: selectedOptions.user_id
+				user_id: user_id
 			}
 		}).then(function(response) {
 			user_info = response[0];
@@ -92,83 +109,69 @@ var userView = (function() {
 			DOM.$yelper_total_likes.val(user_info.total_likes);
 			DOM.$yelper_tip_count.val(user_info.tip_count);
 		});
-		selectedOptions = {};
 	}
 
-	function renderFriends() {
+	function updateUserLocation(user_id, long, lat) {
+		$.ajax({
+			method: "GET",
+			url: "http://localhost:3000/updateUserLocation",
+			data: {
+				user_id: user_id,
+				long: long,
+				lat: lat
+			}
+		}).then(function(response) {
+			renderUserInformation(user_id);
+		});
+	}
+
+	function renderFriends(user_id) {
 		$.ajax({
 			method: "GET",
 			url: "http://localhost:3000/getFriends",
 			data: {
-				state: selectedOptions.state,
-				city: selectedOptions.city,
-				postal_code: selectedOptions.zipcode,
-				catagories: selectedOptions.catagories
+				user_id: user_id
 			}
 		}).then(function(response) {
-			console.log(response);
-			businesses = [];
+			DOM.$friendsTable.html("");
 			for (var entry in response) {
-				businesses.push(response[entry]);
-			}
-
-			DOM.$businessTableEntries.empty();
-			var entry = DOM.$businessTableEntries;
-			let i = 1;
-			for (var entryIndex in businesses) {
-				var $row = $("<tr></tr>");
-				var $head = $("<td></td>").html(i);
-				var $name = $("<td></td>").html(businesses[entryIndex].business_name);
-				var $stars = $("<td></td>").html(businesses[entryIndex].stars);
-				var $tips = $("<td></td>").html(businesses[entryIndex].num_tips);
-				var $id = $('<td hidden="true"></td>').html(
-					businesses[entryIndex].business_id
-				);
-				var $checkins = $("<td></td>").html(
-					businesses[entryIndex].num_checkins
-				);
-				$row.append([$head, $name, $stars, $tips, $checkins, $id]);
-				entry.append($row);
-				i += 1;
+				user_info = response[entry];
+				DOM.$friendsTable.append(
+					`
+					<tr>
+						<td scope="col">${user_info.user_name}</td><!--Name-->
+						<td scope="col">${user_info.total_likes}</td><!--Total Likes-->
+						<td scope="col">${user_info.average_stars}</td><!--Avg Stars-->
+						<td scope="col">${user_info.yelping_since}</td><!--Yelping Since-->
+					</tr>
+					`
+				)
 			}
 		});
 	}
 
-	function renderFriendsTips() {
+	function renderFriendsTips(user_id) {
 		$.ajax({
 			method: "GET",
 			url: "http://localhost:3000/getFriendsTips",
 			data: {
-				state: selectedOptions.state,
-				city: selectedOptions.city,
-				postal_code: selectedOptions.zipcode,
-				catagories: selectedOptions.catagories
+				user_id: user_id
 			}
 		}).then(function(response) {
-			console.log(response);
-			businesses = [];
+			DOM.$friendsTipTable.html("");
 			for (var entry in response) {
-				businesses.push(response[entry]);
-			}
-
-			DOM.$businessTableEntries.empty();
-			var entry = DOM.$businessTableEntries;
-			let i = 1;
-			for (var entryIndex in businesses) {
-				var $row = $("<tr></tr>");
-				var $head = $("<td></td>").html(i);
-				var $name = $("<td></td>").html(businesses[entryIndex].business_name);
-				var $stars = $("<td></td>").html(businesses[entryIndex].stars);
-				var $tips = $("<td></td>").html(businesses[entryIndex].num_tips);
-				var $id = $('<td hidden="true"></td>').html(
-					businesses[entryIndex].business_id
-				);
-				var $checkins = $("<td></td>").html(
-					businesses[entryIndex].num_checkins
-				);
-				$row.append([$head, $name, $stars, $tips, $checkins, $id]);
-				entry.append($row);
-				i += 1;
+				tip_info = response[entry];
+				DOM.$friendsTipTable.append(
+					`
+					<tr>
+						<td scope="col">${tip_info.user_name}</td><!--Name-->
+						<td scope="col">${tip_info.business_name}</td><!--Business-->
+						<td scope="col">${tip_info.city}</td><!--City-->
+						<td scope="col">${tip_info.tip_text}</td><!--Text-->
+						<td scope="col">${tip_info.date_created}</td><!--Date-->
+					</tr>
+					`
+				)
 			}
 		});
 	}
@@ -177,7 +180,7 @@ var userView = (function() {
 		let win = BrowserWindow.getFocusedWindow();
 		win.loadURL(
 			url.format({
-				pathname: path.join(__dirname, "userView.html"),
+				pathname: path.join(__dirname, "businessView.html"),
 				protocol: "file:",
 				slashes: true
 			})
