@@ -35,8 +35,8 @@
         <div class="navbar">
 			<ul>
 				<li><a style="color: lightgrey !important; font-weight: bold;">CptS 451 Project</a></li>
-				<li><a class="active" href="./userView.html">User Information</a></li>
-				<li><a href="./businessView.html">Business Information</a></li>
+				<li><a id="userView_link" class="active">User Information</a></li>
+				<li><a id="businessView_link">Business Information</a></li>
 			</ul>
 		</div>
     </header>
@@ -46,22 +46,22 @@
                 <div id="set_user_container">
                     <h3>Set Current User</h3>
                     <hr/>
-                    <form>
-                        <label for="name">Search Users:</label>
-                        <input type="text" id="search_users" name="search_users">
-                    </form>
-                    <select id="search_users_results" size="10" class="selection-list" style="width: 100%;"></select>
+                    <div style="margin-bottom: 50px;">
+                        <label for="search_users">Search Users:</label>
+                        <input type="search" id="search_users" name="search_users">
+                    </div>
+                    <select id="search_users_results" size="20" class="selection-list" style="width: 100%;"></select>
                 </div>
                 <div id="user_info_container">
                     <h3>User Information</h3>
                     <hr/>
-                    <form>
-                        <label for="name">Name:</label>
-                        <input type="text" disabled="true" id="name" name="name"><br>
+                    <div>
+                        <label for="user_name">Name:</label>
+                        <input type="text" disabled="true" id="user_name" name="user_name"><br>
                         <div class="inline_container">
                             <div style="margin: 20px;">
-                                <label for="stars">Stars:</label>
-                                <input type="text" disabled="true" id="stars" name="stars" style="width: 100px;">
+                                <label for="average_stars">Stars:</label>
+                                <input type="text" disabled="true" id="average_stars" name="average_stars" style="width: 100px;">
                             </div>
                             <div style="margin: 20px;">
                                 <label for="fans">Fans:</label>
@@ -72,8 +72,8 @@
                         <input type="text" disabled="true" id="yelping_since" name="yelping_since"><br><br>
                         <label for="tip_count">Tip Count:</label>
                         <input type="text" disabled="true" id="tip_count" name="tip_count"><br><br>
-                        <label for="tip_likes">Total Tip Likes:</label>
-                        <input type="text" disabled="true" id="tip_likes" name="tip_likes"><br><br>
+                        <label for="total_likes">Total Tip Likes:</label>
+                        <input type="text" disabled="true" id="total_likes" name="total_likes"><br><br>
                         <h4 style="text-align: center;">Votes</h4>
                         <div id="votes" class="inline_container">
                             <div>
@@ -94,19 +94,19 @@
                             <div>
                                 <label for="latitude">Latitude</label><br>
                                 <input type="text" disabled="true" id="latitude" name="latitude"><br><br>
-                                <input type="button" value="Edit" style="width: 100px;"/>
+                                <input id="edit_location" type="button" value="Edit" style="width: 100px;"/>
                             </div>
                             <div>
                                 <label for="longitude">Longitude</label><br>
                                 <input type="text" disabled="true" id="longitude" name="longitude"><br><br>
-                                <input type="button" value="Update" style="width: 100px;"/>
+                                <input id="update_location" type="button" value="Update" style="width: 100px;"/>
                             </div>
                         </div>
-                    </form>
+                    </div>
                 </div>
             </div>
-            <div>
-                <table class="table" id="friends_table">
+            <div class="inline_container">
+                <table class="table" id="friends_table" style="border: 5px solid black; margin-right: 5px;">
                     <thead>
                         <tr id="friends_table_columns">
                             <th scope="col">Name</th>
@@ -118,9 +118,7 @@
                     <tbody id="friends_table_entries">
                     </tbody>
                 </table>
-            </div>
-            <div>
-                <table class="table" id="friends_tip_table">
+                <table class="table" id="friends_tip_table" style="border: 5px solid black; margin-left: 5px;">
                     <thead>
                         <tr id="friends_tip_table_columns">
                             <th scope="col">Name</th>
