@@ -33,8 +33,44 @@
 	</head>
 	<body>
 		<h1>CptS 451 Project</h1>
-		<h2 id="business-name"></h2>
-		<div id="tip-list"></div>
+		<h2 id="business-name">Name:</h2>
+		<h3 id="business-address">Address:</h3>
+		<h3 id="business-open">Open:</h3>
+		<h3 id="business-close">Close:</h3>
+		<h3>Catagories:</h3>
+		<ul id="business-catagories"></ul>
+
+		<canvas id="checkins-chart" width="100" height="50"></canvas>
+
+		<table class="table" id="all-tips-table">
+			<thead>
+				<tr id="all-tips-table-columns">
+					<th scope="col">#</th>
+					<th scope="col">Date</th>
+					<th scope="col">User Name</th>
+					<th scope="col">Likes</th>
+					<th scope="col">Text</th>
+				</tr>
+			</thead>
+			<tbody id="all-tips-table-entries"></tbody>
+		</table>
+		<button id="submit-checkin" type="submit" class="btn btn-primary">
+			Checkin!
+		</button>
+		<button id="submit-like" type="submit" class="btn btn-primary">
+			Like Tip
+		</button>
+		<table class="table" id="friend-tips-table">
+			<thead>
+				<tr id="friend-tips-table-columns">
+					<th scope="col">User Name</th>
+					<th scope="col">Date</th>
+					<th scope="col">Likes</th>
+					<th scope="col">Text</th>
+				</tr>
+			</thead>
+			<tbody id="friend-tips-table-entries"></tbody>
+		</table>
 		<form class="new-tip-form">
 			<div class="form-group">
 				<label for="exampleFormControlTextarea1">Enter New Tip</label>

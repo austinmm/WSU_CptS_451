@@ -14,6 +14,8 @@
 	},
 	"dependencies": {
 		"bootstrap": "^4.4.1",
+		"chart.js": "^2.9.3",
+		"electron-chartjs": "^1.0.0",
 		"express": "^4.17.1",
 		"jquery": "^3.4.1",
 		"pg": "^7.18.2"

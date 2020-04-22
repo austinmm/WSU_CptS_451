@@ -4,17 +4,17 @@ const url = require("url");
 const path = require("path");
 
 let win;
-var businessData = {};
+var data = {};
 
 function createWindow() {
 	// Create the browser window.
 	win = new BrowserWindow({
-		width: 800,
-		height: 600,
+		width: 1000,
+		height: 900,
 		webPreferences: {
-			nodeIntegration: true
+			nodeIntegration: true,
 		},
-		show: true
+		show: true,
 	});
 
 	// and load the index.html of the app.
@@ -22,7 +22,7 @@ function createWindow() {
 		url.format({
 			pathname: path.join(__dirname, "userView.html"),
 			protocol: "file:",
-			slashes: true
+			slashes: true,
 		})
 	);
 
@@ -38,17 +38,32 @@ function createWindow() {
 app.whenReady().then(createWindow);
 
 // IPC messages
+
+// Business Data cache
 // Event handler for asynchronous incoming messages
 ipcMain.on("set-business-data", (event, arg) => {
 	console.log(arg);
-	businessData.info = arg;
-	event.sender.send("reply-business-data", businessData);
+	data.info = arg;
+	event.sender.send("reply-business-data", data);
 });
 
 // Event handler for asynchronous incoming messages
 ipcMain.on("get-business-data", (event, arg) => {
 	// Event emitter for sending asynchronous messages
-	event.sender.send("listen-business-data", businessData);
+	event.sender.send("listen-business-data", data);
+});
+
+// User data cache
+ipcMain.on("set-user-data", (event, arg) => {
+	console.log(arg);
+	data.user = arg;
+	event.sender.send("reply-user-data", data);
+});
+
+// Event handler for asynchronous incoming messages
+ipcMain.on("get-user-data", (event, arg) => {
+	// Event emitter for sending asynchronous messages
+	event.sender.send("listen-user-data", data);
 });
 
 // Quit when all windows are closed.
