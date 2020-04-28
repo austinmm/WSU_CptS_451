@@ -56,9 +56,9 @@ const getCatagories = (request, response) => {
 };
 
 const getBusinesses = (request, response) => {
-	queryString = `SELECT *
+	queryString = `SELECT DISTINCT *
     from
-        (SELECT *
+        (SELECT DISTINCT *
         FROM
             business
         WHERE state='${request.query.state}' AND city='${request.query.city}' AND postal_code='${request.query.postal_code}') as localBusinesses
@@ -77,6 +77,40 @@ const getBusinesses = (request, response) => {
 
 	queryString += `) as allCatagories ORDER BY ${request.query.sortBy};`;
 	//console.log(queryString);
+
+	console.log("Making request");
+	pool.query(queryString, (error, results) => {
+		if (error) {
+			throw error;
+		}
+		//console.log(results);
+		response.status(200).json(results.rows);
+	});
+};
+
+const getBusinessesWithDistance = (request, response) => {
+	queryString = `SELECT DISTINCT *
+    from
+        (SELECT DISTINCT *, getDistance(business.longitude, business.latitude, yelper.longitude, yelper.latitude) as dist
+        FROM
+            business, yelper
+        WHERE state='${request.query.state}' AND city='${request.query.city}' AND postal_code='${request.query.postal_code}' AND Yelper.user_id='${request.query.user_id}') as localBusinesses
+    
+    NATURAL JOIN (`;
+
+	for (let catIndex in request.query.catagories) {
+		if (catIndex > 0) {
+			queryString += ` INTERSECT `;
+		}
+
+		queryString += ` select business_id
+        from business_category
+        where category = '${request.query.catagories[catIndex]}'`;
+	}
+
+	queryString += `) as allCatagories ORDER BY ${request.query.sortBy};`;
+	console.log("Query string");
+	console.log(queryString);
 
 	console.log("Making request");
 	pool.query(queryString, (error, results) => {
@@ -160,20 +194,20 @@ const getTipsFromFriends = (request, response) => {
 			AND business.business_id = '${request.query.business_id}'
 		ORDER BY tip.date_created DESC;
 	`;
-	console.log("Get Tips From Friends:");
-	console.log(sql_query);
+
 	pool.query(sql_query, (error, results) => {
 		if (error) {
 			throw error;
 		}
-		console.log(results.rows);
+
 		response.status(200).json(results.rows);
 	});
 };
 
 const postTip = (request, response) => {
-	//console.log("REQUEST QUERY");
-	//console.log(request.body);
+	console.log("REQUEST QUERY");
+	console.log(request.body);
+	console.log(request.query);
 	const queryString = `INSERT INTO Tip (user_id, business_id, tip_text) VALUES ('${request.body.user_id}','${request.body.business_id}', '${request.body.tip_text}');`;
 	//console.log("QUERY STRING");
 	//console.log(queryString);
@@ -181,7 +215,7 @@ const postTip = (request, response) => {
 		if (error) {
 			throw error;
 		}
-		//console.log(results.rows);
+		console.log(results.rows);
 		response.status(200).json(results.rows);
 	});
 };
@@ -229,7 +263,7 @@ const getBusinessCheckins = (request, response) => {
 };
 
 const getDistance = (request, response) => {
-	console.log(request.query);
+	//console.log(request.query);
 
 	pool.query(
 		`SELECT getDistance(${request.query.long1},${request.query.lat1},${request.query.long2},${request.query.lat2});`,
@@ -237,7 +271,7 @@ const getDistance = (request, response) => {
 			if (error) {
 				throw error;
 			}
-			console.log(results.rows);
+			//console.log(results.rows);
 			response.status(200).json(results.rows);
 		}
 	);
@@ -259,4 +293,5 @@ module.exports = {
 	postBusinessCheckin,
 	likeTip,
 	getDistance,
+	getBusinessesWithDistance,
 };

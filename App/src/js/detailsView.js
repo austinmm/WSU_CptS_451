@@ -42,7 +42,6 @@ var detailsView = (function () {
 
 	// data retrevial
 	function getBusinessData() {
-		console.log(user_id);
 		$.ajax({
 			method: "GET",
 			url: "http://localhost:3000/getBusinessID",
@@ -54,6 +53,7 @@ var detailsView = (function () {
 			},
 		}).then(function (response) {
 			business_data = response[0];
+			console.log(`business_data: ${business_data}`);
 			var selectedTip = {};
 			var tips = [];
 			var friendTips = [];
@@ -67,17 +67,22 @@ var detailsView = (function () {
 	function handleSubmit(e) {
 		console.log("Sumbit!");
 		let tip_text = $("textarea").val();
-		console.log(business_id, user_id, tip_text);
+		console.log({
+			user_id: user_id,
+			business_id: business_data.business_id,
+			tip_text: tip_text,
+		});
 		$.ajax({
 			method: "POST",
 			url: "http://localhost:3000/postTip",
 			data: {
 				user_id: user_id,
-				business_id: business_id,
+				business_id: business_data.business_id,
 				tip_text: tip_text,
 			},
 		}).then(function (response) {
-			console.log(response);
+			console.log(`RESPONSE: ${response}`);
+			renderTips();
 		});
 	}
 
@@ -253,7 +258,7 @@ var detailsView = (function () {
 				user_id: user_id,
 			},
 		}).then(function (res) {
-			//console.log("Get Tips:");
+			console.log("Get Tips Friends:");
 			console.log(res);
 
 			for (var entry in res) {
@@ -273,7 +278,7 @@ var detailsView = (function () {
 				var $rowFriend = $("<tr></tr>");
 				var $dateFriend = $("<td></td>").html(friendTips[entryIndex].date);
 				var $user_nameFriend = $("<td></td>", {
-					text: friendTips[entryIndex],
+					text: friendTips[entryIndex].user_name,
 					value: friendTips[entryIndex].user_id,
 				});
 				var $tip_textFriend = $("<td></td>").html(

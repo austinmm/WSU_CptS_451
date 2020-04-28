@@ -203,83 +203,32 @@ var businessView = (function () {
 			catagories: selectedOptions.catagories,
 			sortBy: selectedOptions.sortBy,
 		});
-		$.ajax({
-			method: "GET",
-			url: "http://localhost:3000/getBusinesses",
-			data: {
-				state: selectedOptions.state,
-				city: selectedOptions.city,
-				postal_code: selectedOptions.zipcode,
-				catagories: selectedOptions.catagories,
-				sortBy: selectedOptions.sortBy,
-			},
-		}).then(function (response) {
-			console.log(response);
-			businesses = [];
-			for (var entry in response) {
-				businesses.push(response[entry]);
-			}
 
-			DOM.$businessTableEntries.empty();
-			var entry = DOM.$businessTableEntries;
-			let i = 1;
-			for (var entryIndex in businesses) {
-				distance = "N/A";
-				console.log(getDistance);
-				if (getDistance == true) {
-					console.log({
-						long1: parseFloat(local_data.user.user_info.longitude),
-						lat1: parseFloat(local_data.user.user_info.latitude),
-						long2: parseFloat(businesses[entryIndex].longitude),
-						lat2: parseFloat(businesses[entryIndex].latitude),
-					});
-					$.ajax({
-						method: "GET",
-						url: "http://localhost:3000/getDistance",
-						data: {
-							long1: parseFloat(local_data.user.user_info.longitude),
-							lat1: parseFloat(local_data.user.user_info.latitude),
-							long2: parseFloat(businesses[entryIndex].longitude),
-							lat2: parseFloat(businesses[entryIndex].latitude),
-						},
-					}).then(function (response) {
-						console.log(response);
-						distance = response[0].getdistance.toString() + " mi";
-						console.log(distance);
-						var $row = $("<tr></tr>");
-						var $head = $("<td></td>").html(i);
-						var $name = $("<td></td>").html(
-							businesses[entryIndex].business_name
-						);
-						var $address = $("<td></td>").html(businesses[entryIndex].address);
-						var $city = $("<td></td>").html(businesses[entryIndex].city);
-						var $state = $("<td></td>").html(businesses[entryIndex].state);
-						var $distance = $("<td></td>").html(distance);
-						var $stars = $("<td></td>").html(businesses[entryIndex].stars);
-						var $tips = $("<td></td>").html(businesses[entryIndex].num_tips);
-						var $checkins = $("<td></td>").html(
-							businesses[entryIndex].num_checkins
-						);
-						var $id = $('<td hidden="true"></td>').html(
-							businesses[entryIndex].business_id
-						);
+		if (getDistance == false) {
+			$.ajax({
+				method: "GET",
+				url: "http://localhost:3000/getBusinesses",
+				data: {
+					state: selectedOptions.state,
+					city: selectedOptions.city,
+					postal_code: selectedOptions.zipcode,
+					catagories: selectedOptions.catagories,
+					sortBy: selectedOptions.sortBy,
+				},
+			}).then(function (response) {
+				console.log(response);
+				businesses = [];
+				for (var entry in response) {
+					businesses.push(response[entry]);
+				}
 
-						$row.append([
-							$head,
-							$name,
-							$address,
-							$city,
-							$state,
-							$distance,
-							$stars,
-							$tips,
-							$checkins,
-							$id,
-						]);
-						entry.append($row);
-						i += 1;
-					});
-				} else {
+				DOM.$businessTableEntries.empty();
+				var entry = DOM.$businessTableEntries;
+				let i = 1;
+				for (var entryIndex in businesses) {
+					distance = "N/A";
+					console.log(getDistance);
+
 					var $row = $("<tr></tr>");
 					var $head = $("<td></td>").html(i);
 					var $name = $("<td></td>").html(businesses[entryIndex].business_name);
@@ -311,8 +260,63 @@ var businessView = (function () {
 					entry.append($row);
 					i += 1;
 				}
-			}
-		});
+			});
+		} else {
+			$.ajax({
+				method: "GET",
+				url: "http://localhost:3000/getBusinessesWithDistance",
+				data: {
+					state: selectedOptions.state,
+					city: selectedOptions.city,
+					postal_code: selectedOptions.zipcode,
+					catagories: selectedOptions.catagories,
+					sortBy: selectedOptions.sortBy,
+					user_id: local_data.user.user_info.user_id,
+				},
+			}).then(function (response) {
+				console.log(response);
+				businesses = [];
+				for (var entry in response) {
+					businesses.push(response[entry]);
+				}
+
+				DOM.$businessTableEntries.empty();
+				var entry = DOM.$businessTableEntries;
+				let i = 1;
+				for (var entryIndex in businesses) {
+					var $row = $("<tr></tr>");
+					var $head = $("<td></td>").html(i);
+					var $name = $("<td></td>").html(businesses[entryIndex].business_name);
+					var $address = $("<td></td>").html(businesses[entryIndex].address);
+					var $city = $("<td></td>").html(businesses[entryIndex].city);
+					var $state = $("<td></td>").html(businesses[entryIndex].state);
+					var $distance = $("<td></td>").html(businesses[entryIndex].dist);
+					var $stars = $("<td></td>").html(businesses[entryIndex].stars);
+					var $tips = $("<td></td>").html(businesses[entryIndex].num_tips);
+					var $checkins = $("<td></td>").html(
+						businesses[entryIndex].num_checkins
+					);
+					var $id = $('<td hidden="true"></td>').html(
+						businesses[entryIndex].business_id
+					);
+
+					$row.append([
+						$head,
+						$name,
+						$address,
+						$city,
+						$state,
+						$distance,
+						$stars,
+						$tips,
+						$checkins,
+						$id,
+					]);
+					entry.append($row);
+					i += 1;
+				}
+			});
+		}
 	}
 
 	function renderDetails() {

@@ -19,6 +19,7 @@ server.get("/getBusinessCheckins", db.getBusinessCheckins);
 server.post("/likeTip", db.likeTip);
 server.post("/postBusinessCheckin", db.postBusinessCheckin);
 server.get("/getDistance", db.getDistance);
+server.get("/getBusinessesWithDistance", db.getBusinessesWithDistance)
 // User Data
 server.get("/getUserIDs", userViewDB.getUserIDs);
 server.get("/getUser", userViewDB.getUser);
