@@ -3,8 +3,7 @@ const path = require("path");
 const { ipcRenderer } = require("electron");
 const { BrowserWindow } = require("electron").remote;
 
-
-var userView = (function() {
+var userView = (function () {
 	// placeholder for cached DOM elements
 	var DOM = {};
 
@@ -18,7 +17,7 @@ var userView = (function() {
 		DOM.$friendsTable = $("#friends_table_entries");
 		DOM.$friendsTipTable = $("#friends_tip_table_entries");
 
-		DOM.$yelper_user_name= $("#user_name");
+		DOM.$yelper_user_name = $("#user_name");
 		DOM.$yelper_average_stars = $("#average_stars");
 		DOM.$yelper_yelping_since = $("#yelping_since");
 		DOM.$yelper_fans = $("#fans");
@@ -27,8 +26,8 @@ var userView = (function() {
 		DOM.$yelper_funny = $("#funny");
 		DOM.$yelper_longitude = $("#longitude");
 		DOM.$yelper_latitude = $("#latitude");
-		DOM.$yelper_total_likes= $("#total_likes");
-		DOM.$yelper_tip_count= $("#tip_count");
+		DOM.$yelper_total_likes = $("#total_likes");
+		DOM.$yelper_tip_count = $("#tip_count");
 	}
 	// bind events
 	function bindEvents() {
@@ -38,7 +37,6 @@ var userView = (function() {
 		DOM.$updateUserLocation.click(handleUserLocationUpdate);
 		DOM.$businessViewLink.click(renderBusinessView);
 	}
-	
 
 	function handleUserSearch(e) {
 		const user_name = $(this).val();
@@ -46,7 +44,7 @@ var userView = (function() {
 	}
 
 	function handleUserSelection(e) {
-		 const user_id = $(this).val();
+		const user_id = $(this).val();
 		renderUserInformation(user_id);
 		renderFriends(user_id);
 		renderFriendsTips(user_id);
@@ -65,23 +63,23 @@ var userView = (function() {
 		$("#latitude").prop("disabled", true);
 		updateUserLocation(user_id, long, lat);
 	}
-	
+
 	// render DOM
 	function renderUserIDs(user_name) {
 		$.ajax({
 			method: "GET",
 			url: "http://localhost:3000/getUserIDs",
 			data: {
-				user_name: user_name
-			}
-		}).then(function(response) {
+				user_name: user_name,
+			},
+		}).then(function (response) {
 			DOM.$selectUser.html("");
 			for (var entry in response) {
 				user_id = response[entry].user_id;
 				DOM.$selectUser.append(
 					$("<option/>", {
 						text: user_id,
-						value: user_id
+						value: user_id,
 					})
 				);
 			}
@@ -93,10 +91,12 @@ var userView = (function() {
 			method: "GET",
 			url: "http://localhost:3000/getUser",
 			data: {
-				user_id: user_id
-			}
-		}).then(function(response) {
+				user_id: user_id,
+			},
+		}).then(function (response) {
 			user_info = response[0];
+			ipcRenderer.send("set-user-data", { user_info });
+
 			DOM.$yelper_user_name.val(user_info.user_name);
 			DOM.$yelper_average_stars.val(user_info.average_stars);
 			DOM.$yelper_yelping_since.val(user_info.yelping_since);
@@ -108,6 +108,11 @@ var userView = (function() {
 			DOM.$yelper_latitude.val(user_info.latitude);
 			DOM.$yelper_total_likes.val(user_info.total_likes);
 			DOM.$yelper_tip_count.val(user_info.tip_count);
+
+			ipcRenderer.on("reply-user-data", (event, arg) => {
+				console.log("IPC USER RENDERER:");
+				console.log(arg);
+			});
 		});
 	}
 
@@ -118,9 +123,9 @@ var userView = (function() {
 			data: {
 				user_id: user_id,
 				long: long,
-				lat: lat
-			}
-		}).then(function(response) {
+				lat: lat,
+			},
+		}).then(function (response) {
 			renderUserInformation(user_id);
 		});
 	}
@@ -130,9 +135,9 @@ var userView = (function() {
 			method: "GET",
 			url: "http://localhost:3000/getFriends",
 			data: {
-				user_id: user_id
-			}
-		}).then(function(response) {
+				user_id: user_id,
+			},
+		}).then(function (response) {
 			DOM.$friendsTable.html("");
 			for (var entry in response) {
 				user_info = response[entry];
@@ -145,7 +150,7 @@ var userView = (function() {
 						<td scope="col">${user_info.yelping_since}</td><!--Yelping Since-->
 					</tr>
 					`
-				)
+				);
 			}
 		});
 	}
@@ -155,9 +160,9 @@ var userView = (function() {
 			method: "GET",
 			url: "http://localhost:3000/getFriendsTips",
 			data: {
-				user_id: user_id
-			}
-		}).then(function(response) {
+				user_id: user_id,
+			},
+		}).then(function (response) {
 			DOM.$friendsTipTable.html("");
 			for (var entry in response) {
 				tip_info = response[entry];
@@ -171,7 +176,7 @@ var userView = (function() {
 						<td scope="col">${tip_info.date_created}</td><!--Date-->
 					</tr>
 					`
-				)
+				);
 			}
 		});
 	}
@@ -182,7 +187,7 @@ var userView = (function() {
 			url.format({
 				pathname: path.join(__dirname, "businessView.html"),
 				protocol: "file:",
-				slashes: true
+				slashes: true,
 			})
 		);
 	}
@@ -193,13 +198,12 @@ var userView = (function() {
 		console.log("userView init...");
 		cacheDom();
 		bindEvents();
-		$(document).ready(function() {
+		$(document).ready(function () {
 			// document is loaded and DOM is ready
-
 		});
 	}
 	/* =============== export public methods =============== */
 	return {
-		init: init
+		init: init,
 	};
 })();

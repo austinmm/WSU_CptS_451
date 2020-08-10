@@ -34,12 +34,18 @@
 	<header>
 		<div class="navbar">
 			<ul>
-				<li><a style="color: lightgrey !important; font-weight: bold;">CptS 451 Project</a></li>
+				<li>
+					<a style="color: lightgrey !important; font-weight: bold;"
+						>CptS 451 Project</a
+					>
+				</li>
 				<li><a id="userView_link">User Information</a></li>
-				<li><a id="businessView_link" class="active">Business Information</a></li>
+				<li>
+					<a id="businessView_link" class="active">Business Information</a>
+				</li>
 			</ul>
 		</div>
-    </header>
+	</header>
 	<body>
 		<div class="flex-container">
 			<div id="option-menu">
@@ -62,6 +68,16 @@
 				<h3>Select Business Catagories:</h3>
 				<p>Hold control/command for multiple selections</p>
 				<select id="catagories" size="4" multiple class="selection-list">
+				</select>
+			</div>
+			<div>
+				<h3>Sort By:</h3>
+				<select id="sortBy" size="4">
+					<option selected value="business_name">Name (default)</option>
+					<option value="stars DESC">Highest Rated</option>
+					<option value="num_tips DESC">Most Tips</option>
+					<option value="num_checkins DESC">Most Checkins</option>
+					<option value="dist DESC">Nearest</option>
 				</select>
 			</div>
 			<div>

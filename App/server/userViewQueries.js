@@ -1,21 +1,18 @@
-const pool = require("./config.js");
+const pool = require("./config_n.js");
 
 const getUserIDs = (request, response) => {
 	const sql_query = `
 		SELECT yelper.user_id
 		FROM yelper
-		WHERE yelper.user_name LIKE '${request.query.user_name + '%'}';
+		WHERE yelper.user_name LIKE '${request.query.user_name + "%"}';
 	`;
 	console.log(sql_query);
-	pool.query(
-        sql_query,
-		(error, results) => {
-			if (error) {
-				throw error;
-			}
-			response.status(200).json(results.rows);
+	pool.query(sql_query, (error, results) => {
+		if (error) {
+			throw error;
 		}
-	);
+		response.status(200).json(results.rows);
+	});
 };
 
 const getUser = (request, response) => {
@@ -25,15 +22,12 @@ const getUser = (request, response) => {
 		WHERE yelper.user_id = '${request.query.user_id}';
 	`;
 	console.log(sql_query);
-	pool.query(
-        sql_query,
-		(error, results) => {
-			if (error) {
-				throw error;
-			}
-			response.status(200).json(results.rows);
+	pool.query(sql_query, (error, results) => {
+		if (error) {
+			throw error;
 		}
-	);
+		response.status(200).json(results.rows);
+	});
 };
 
 const updateUserLocation = (request, response) => {
@@ -43,15 +37,12 @@ const updateUserLocation = (request, response) => {
 		WHERE user_id = '${request.query.user_id}';
 	`;
 	console.log(sql_query);
-	pool.query(
-        sql_query,
-		(error, results) => {
-			if (error) {
-				throw error;
-			}
-			response.status(200).json('');
+	pool.query(sql_query, (error, results) => {
+		if (error) {
+			throw error;
 		}
-	);
+		response.status(200).json("");
+	});
 };
 
 const getFriends = (request, response) => {
@@ -64,15 +55,12 @@ const getFriends = (request, response) => {
 		ORDER BY yelper.user_name ASC;
 	`;
 	console.log(sql_query);
-	pool.query(
-        sql_query,
-		(error, results) => {
-			if (error) {
-				throw error;
-			}
-			response.status(200).json(results.rows);
+	pool.query(sql_query, (error, results) => {
+		if (error) {
+			throw error;
 		}
-	);
+		response.status(200).json(results.rows);
+	});
 };
 
 const getFriendsTips = (request, response) => {
@@ -81,20 +69,17 @@ const getFriendsTips = (request, response) => {
 		FROM friendship, yelper, tip, business
 		WHERE friendship.user_id = '${request.query.user_id}'
 			AND yelper.user_id = friendship.friend_id
-			AND tip.user_id = friendship.user_id
+			AND tip.user_id = friendship.friend_id
 			AND business.business_id = tip.business_id
 		ORDER BY tip.date_created DESC;
 	`;
 	console.log(sql_query);
-	pool.query(
-		sql_query,
-		(error, results) => {
-			if (error) {
-				throw error;
-			}
-			response.status(200).json(results.rows);
+	pool.query(sql_query, (error, results) => {
+		if (error) {
+			throw error;
 		}
-	);
+		response.status(200).json(results.rows);
+	});
 };
 
 module.exports = {
@@ -102,5 +87,5 @@ module.exports = {
 	getUser,
 	updateUserLocation,
 	getFriends,
-	getFriendsTips
+	getFriendsTips,
 };

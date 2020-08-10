@@ -3,18 +3,19 @@ const path = require("path");
 const { ipcRenderer } = require("electron");
 const { BrowserWindow } = require("electron").remote;
 
-
-var businessView = (function() {
+var businessView = (function () {
 	// placeholder for cached DOM elements
 	var DOM = {};
-	var selectedOptions = {};
-
+	var selectedOptions = { sortBy: "business_name" };
+	var defaultOptions = { sortBy: "business_name" }; // set default sortBy
 	// Data
 	var states = [];
 	var cities = [];
 	var zipcodes = ["98682", "99163", "83701", "98684"];
 	var catagories = ["Restaruant", "Cars", "Groceries", "Fast Food"];
 	var businesses = [];
+	var local_data = {};
+	var getDistance = true;
 
 	// cache DOM elements
 	function cacheDom() {
@@ -26,6 +27,7 @@ var businessView = (function() {
 		DOM.$cities = $("#cities");
 		DOM.$zipcode = $("#zipcodes");
 		DOM.$catagories = $("#catagories");
+		DOM.$sortBy = $("#sortBy");
 	}
 	// bind events
 	function bindEvents() {
@@ -35,6 +37,7 @@ var businessView = (function() {
 		DOM.$catagories.change(handleCatagoriesSelection);
 		DOM.$businessTable.on("click", "tr", handleBusinessSelection);
 		DOM.$userViewLink.click(renderUserView);
+		DOM.$sortBy.change(handleSortBySelection);
 	}
 	// handle click events
 	function handleStateSelection(e) {
@@ -66,12 +69,19 @@ var businessView = (function() {
 		selectedOptions.business = $(this)[0].innerText.split("\t");
 		renderDetails();
 	}
+
+	function handleSortBySelection(e) {
+		selectedOptions.sortBy = $(this).val();
+		if (Object.keys(selectedOptions).length >= 5) {
+			renderBusinessTable();
+		}
+	}
 	// render DOM
 	function renderStates() {
 		$.ajax({
 			method: "GET",
-			url: "http://localhost:3000/getStates"
-		}).then(function(response) {
+			url: "http://localhost:3000/getStates",
+		}).then(function (response) {
 			states = [];
 			for (var entry in response) {
 				states.push(response[entry].state);
@@ -81,20 +91,20 @@ var businessView = (function() {
 				DOM.$states.append(
 					$("<option/>", {
 						text: states[stateIndex],
-						value: states[stateIndex]
+						value: states[stateIndex],
 					})
 				);
 			}
 		});
-		selectedOptions = {};
+		selectedOptions = defaultOptions;
 	}
 
 	function renderCities() {
 		$.ajax({
 			method: "GET",
 			url: "http://localhost:3000/getCities",
-			data: { state: selectedOptions.state }
-		}).then(function(response) {
+			data: { state: selectedOptions.state },
+		}).then(function (response) {
 			cities = [];
 			for (var entry in response) {
 				cities.push(response[entry].city);
@@ -104,7 +114,7 @@ var businessView = (function() {
 				DOM.$cities.append(
 					$("<option/>", {
 						text: cities[cityIndex],
-						value: cities[cityIndex]
+						value: cities[cityIndex],
 					})
 				);
 			}
@@ -116,8 +126,8 @@ var businessView = (function() {
 		$.ajax({
 			method: "GET",
 			url: "http://localhost:3000/getZipcodes",
-			data: { state: selectedOptions.state, city: selectedOptions.city }
-		}).then(function(response) {
+			data: { state: selectedOptions.state, city: selectedOptions.city },
+		}).then(function (response) {
 			zipcodes = [];
 			console.log(response);
 			for (var entry in response) {
@@ -128,7 +138,7 @@ var businessView = (function() {
 				DOM.$zipcode.append(
 					$("<option/>", {
 						text: zipcodes[zipcodeIndex],
-						value: zipcodes[zipcodeIndex]
+						value: zipcodes[zipcodeIndex],
 					})
 				);
 			}
@@ -142,9 +152,9 @@ var businessView = (function() {
 			data: {
 				state: selectedOptions.state,
 				city: selectedOptions.city,
-				postal_code: selectedOptions.zipcode
-			}
-		}).then(function(response) {
+				postal_code: selectedOptions.zipcode,
+			},
+		}).then(function (response) {
 			catagories = [];
 			for (var entry in response) {
 				catagories.push(response[entry].category);
@@ -154,7 +164,7 @@ var businessView = (function() {
 				DOM.$catagories.append(
 					$("<option/>", {
 						text: catagories[catagoryIndex],
-						value: catagories[catagoryIndex]
+						value: catagories[catagoryIndex],
 					})
 				);
 			}
@@ -165,9 +175,13 @@ var businessView = (function() {
 		var mock_headers = [
 			"#",
 			"business name",
-			"stars",
-			"num tips",
-			"num checkin"
+			"Address",
+			"City",
+			"State",
+			"Distance",
+			"Stars",
+			"# Tips",
+			"Total Checkin",
 		];
 		for (var headerIndex in mock_headers) {
 			console.log(mock_headers[headerIndex]);
@@ -175,58 +189,143 @@ var businessView = (function() {
 				$("<th/>", {
 					text: mock_headers[headerIndex],
 					value: mock_headers[headerIndex],
-					scope: "col"
+					scope: "col",
 				})
 			);
 		}
 	}
 
 	function renderBusinessTable() {
-		$.ajax({
-			method: "GET",
-			url: "http://localhost:3000/getBusinesses",
-			data: {
-				state: selectedOptions.state,
-				city: selectedOptions.city,
-				postal_code: selectedOptions.zipcode,
-				catagories: selectedOptions.catagories
-			}
-		}).then(function(response) {
-			console.log(response);
-			businesses = [];
-			for (var entry in response) {
-				businesses.push(response[entry]);
-			}
-
-			DOM.$businessTableEntries.empty();
-			var entry = DOM.$businessTableEntries;
-			let i = 1;
-			for (var entryIndex in businesses) {
-				var $row = $("<tr></tr>");
-				var $head = $("<td></td>").html(i);
-				var $name = $("<td></td>").html(businesses[entryIndex].business_name);
-				var $stars = $("<td></td>").html(businesses[entryIndex].stars);
-				var $tips = $("<td></td>").html(businesses[entryIndex].num_tips);
-				var $id = $('<td hidden="true"></td>').html(
-					businesses[entryIndex].business_id
-				);
-				var $checkins = $("<td></td>").html(
-					businesses[entryIndex].num_checkins
-				);
-				$row.append([$head, $name, $stars, $tips, $checkins, $id]);
-				entry.append($row);
-				i += 1;
-			}
+		console.log({
+			state: selectedOptions.state,
+			city: selectedOptions.city,
+			postal_code: selectedOptions.zipcode,
+			catagories: selectedOptions.catagories,
+			sortBy: selectedOptions.sortBy,
 		});
+
+		if (getDistance == false) {
+			$.ajax({
+				method: "GET",
+				url: "http://localhost:3000/getBusinesses",
+				data: {
+					state: selectedOptions.state,
+					city: selectedOptions.city,
+					postal_code: selectedOptions.zipcode,
+					catagories: selectedOptions.catagories,
+					sortBy: selectedOptions.sortBy,
+				},
+			}).then(function (response) {
+				console.log(response);
+				businesses = [];
+				for (var entry in response) {
+					businesses.push(response[entry]);
+				}
+
+				DOM.$businessTableEntries.empty();
+				var entry = DOM.$businessTableEntries;
+				let i = 1;
+				for (var entryIndex in businesses) {
+					distance = "N/A";
+					console.log(getDistance);
+
+					var $row = $("<tr></tr>");
+					var $head = $("<td></td>").html(i);
+					var $name = $("<td></td>").html(businesses[entryIndex].business_name);
+					var $address = $("<td></td>").html(businesses[entryIndex].address);
+					var $city = $("<td></td>").html(businesses[entryIndex].city);
+					var $state = $("<td></td>").html(businesses[entryIndex].state);
+					var $distance = $("<td></td>").html(distance);
+					var $stars = $("<td></td>").html(businesses[entryIndex].stars);
+					var $tips = $("<td></td>").html(businesses[entryIndex].num_tips);
+					var $checkins = $("<td></td>").html(
+						businesses[entryIndex].num_checkins
+					);
+					var $id = $('<td hidden="true"></td>').html(
+						businesses[entryIndex].business_id
+					);
+
+					$row.append([
+						$head,
+						$name,
+						$address,
+						$city,
+						$state,
+						$distance,
+						$stars,
+						$tips,
+						$checkins,
+						$id,
+					]);
+					entry.append($row);
+					i += 1;
+				}
+			});
+		} else {
+			$.ajax({
+				method: "GET",
+				url: "http://localhost:3000/getBusinessesWithDistance",
+				data: {
+					state: selectedOptions.state,
+					city: selectedOptions.city,
+					postal_code: selectedOptions.zipcode,
+					catagories: selectedOptions.catagories,
+					sortBy: selectedOptions.sortBy,
+					user_id: local_data.user.user_info.user_id,
+				},
+			}).then(function (response) {
+				console.log(response);
+				businesses = [];
+				for (var entry in response) {
+					businesses.push(response[entry]);
+				}
+
+				DOM.$businessTableEntries.empty();
+				var entry = DOM.$businessTableEntries;
+				let i = 1;
+				for (var entryIndex in businesses) {
+					var $row = $("<tr></tr>");
+					var $head = $("<td></td>").html(i);
+					var $name = $("<td></td>").html(businesses[entryIndex].business_name);
+					var $address = $("<td></td>").html(businesses[entryIndex].address);
+					var $city = $("<td></td>").html(businesses[entryIndex].city);
+					var $state = $("<td></td>").html(businesses[entryIndex].state);
+					var $distance = $("<td></td>").html(businesses[entryIndex].dist);
+					var $stars = $("<td></td>").html(businesses[entryIndex].stars);
+					var $tips = $("<td></td>").html(businesses[entryIndex].num_tips);
+					var $checkins = $("<td></td>").html(
+						businesses[entryIndex].num_checkins
+					);
+					var $id = $('<td hidden="true"></td>').html(
+						businesses[entryIndex].business_id
+					);
+
+					$row.append([
+						$head,
+						$name,
+						$address,
+						$city,
+						$state,
+						$distance,
+						$stars,
+						$tips,
+						$checkins,
+						$id,
+					]);
+					entry.append($row);
+					i += 1;
+				}
+			});
+		}
 	}
 
 	function renderDetails() {
-
 		// Synchronous message emmiter and handler
 		ipcRenderer.send("set-business-data", { selectedOptions });
 
 		// Async message handler
 		ipcRenderer.on("reply-business-data", (event, arg) => {
+			console.log("IPC Business RENDERER:");
 			console.log(arg);
 		});
 
@@ -234,15 +333,15 @@ var businessView = (function() {
 			height: 600,
 			width: 800,
 			webPreferences: {
-				nodeIntegration: true
-			}
+				nodeIntegration: true,
+			},
 		});
 
 		win.loadURL(
 			url.format({
 				pathname: path.join(__dirname, "details.html"),
 				protocol: "file:",
-				slashes: true
+				slashes: true,
 			})
 		);
 	}
@@ -253,11 +352,10 @@ var businessView = (function() {
 			url.format({
 				pathname: path.join(__dirname, "userView.html"),
 				protocol: "file:",
-				slashes: true
+				slashes: true,
 			})
 		);
 	}
-	
 
 	// Clear results
 	function clearOptions(options) {
@@ -266,7 +364,7 @@ var businessView = (function() {
 			DOM.$cities,
 			DOM.$zipcode,
 			DOM.$catagories,
-			DOM.$businessTableEntries
+			DOM.$businessTableEntries,
 		];
 		for (entry1 in options) {
 			for (entry2 in tableOptions) {
@@ -287,7 +385,23 @@ var businessView = (function() {
 		console.log("businessView init...");
 		cacheDom();
 		bindEvents();
-		$(document).ready(function() {
+
+		ipcRenderer.send("get-user-data", "");
+
+		// Async message handler
+		console.log("Getting user data:");
+		ipcRenderer.on("listen-user-data", (event, arg) => {
+			local_data = arg;
+			if (
+				Object.keys(local_data) == 0 ||
+				arg.user.user_info.longitude == null ||
+				arg.user.user_info.latitude == null
+			) {
+				getDistance = false;
+			}
+		});
+
+		$(document).ready(function () {
 			// document is loaded and DOM is ready
 			renderStates();
 			renderBusinessTableHeaders();
@@ -295,6 +409,6 @@ var businessView = (function() {
 	}
 	/* =============== export public methods =============== */
 	return {
-		init: init
+		init: init,
 	};
 })();
