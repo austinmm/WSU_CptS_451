@@ -10,7 +10,7 @@
 	"author": "Noah Taylor & Austin Marino",
 	"license": "ISC",
 	"devDependencies": {
-		"electron": "^8.2.2"
+		"electron": "^11.5.0"
 	},
 	"dependencies": {
 		"bootstrap": "^4.4.1",
